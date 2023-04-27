@@ -146,13 +146,10 @@ void Game::Update(DX::StepTimer const& timer)
 	planarMotionVector.y = 0.0;
 
 	if (m_InputCommands.rotRight)
-	{
 		m_camOrientation.y -= m_camRotRate;
-	}
+
 	if (m_InputCommands.rotLeft)
-	{
 		m_camOrientation.y += m_camRotRate;
-	}
 
 	//create look direction from Euler angles in m_camOrientation
 	m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);
@@ -163,22 +160,17 @@ void Game::Update(DX::StepTimer const& timer)
 	m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
 
 	//process input and update stuff
-	if (m_InputCommands.forward)
-	{	
+	if (m_InputCommands.forward)	
 		m_camPosition += m_camLookDirection*m_movespeed;
-	}
+
 	if (m_InputCommands.back)
-	{
 		m_camPosition -= m_camLookDirection*m_movespeed;
-	}
+
 	if (m_InputCommands.right)
-	{
 		m_camPosition += m_camRight*m_movespeed;
-	}
+
 	if (m_InputCommands.left)
-	{
 		m_camPosition -= m_camRight*m_movespeed;
-	}
 
 	//update lookat point
 	m_camLookAt = m_camPosition + m_camLookDirection;
@@ -225,10 +217,8 @@ void Game::Update(DX::StepTimer const& timer)
 void Game::Render()
 {
     // Don't try to render anything before the first Update.
-    if (m_timer.GetFrameCount() == 0)
-    {
-        return;
-    }
+	if (m_timer.GetFrameCount() == 0)
+		return;
 
     Clear();
 
@@ -242,6 +232,7 @@ void Game::Render()
 		const XMVECTORF32 yaxis = { 0.f, 0.f, 512.f };
 		DrawGrid(xaxis, yaxis, g_XMZero, 512, 512, Colors::Gray);
 	}
+
 	//CAMERA POSITION ON HUD
 	m_sprites->Begin();
 	WCHAR   Buffer[256];
@@ -268,6 +259,7 @@ void Game::Render()
 
 		m_deviceResources->PIXEndEvent();
 	}
+
     m_deviceResources->PIXEndEvent();
 
 	//RENDER TERRAIN
