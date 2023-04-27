@@ -287,7 +287,7 @@ void ToolMain::Tick(MSG *msg)
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 }
 
-void ToolMain::UpdateInput(MSG * msg)
+void ToolMain::UpdateInput(MSG* msg)
 {
 
 	switch (msg->message)
@@ -304,42 +304,67 @@ void ToolMain::UpdateInput(MSG * msg)
 		case WM_MOUSEMOVE:
 			break;
 
-		case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
-			//set some flag for the mouse button in inputcommands
+		case WM_MOUSEWHEEL:
+			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0) 
+				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
+			else if (GET_WHEEL_DELTA_WPARAM(msg->wParam) < 0)
+				m_mouseArray[(int)MouseInput::WheelRollDown] = true;
+
 			break;
 
+		case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
+			m_mouseArray[(int)MouseInput::LButtonDown] = true;
+			break;
+
+		case WM_LBUTTONUP:
+			m_mouseArray[(int)MouseInput::LButtonDown] = false;
+			break;
+
+		case WM_RBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
+			m_mouseArray[(int)MouseInput::RButtonDown] = true;
+			break;
+
+		case WM_RBUTTONUP:
+			m_mouseArray[(int)MouseInput::RButtonDown] = false;
+			break;
+
+		case WM_MBUTTONDOWN:
+			m_mouseArray[(int)MouseInput::WheelButtonDown] = true;
+			break;
+
+		case WM_MBUTTONUP:
+			m_mouseArray[(int)MouseInput::WheelButtonDown] = false;
+			break;
 	}
+
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
+#define RESOLVE_BOOL_COMMAND_FROM_ACTION(actionVal, actionEnum) \
+	{ \
+		auto mapping = m_inputMapping.GetMapping(Actions::##actionEnum); \
+		if (mapping.charId >= 0) \
+		{ \
+			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; \
+			if (inputActive) \
+				m_toolInputCommands.##actionVal = true; \
+			else \
+				m_toolInputCommands.##actionVal = false; \
+		} \
+	}
+
 	//WASD movement
-	if (m_keyArray['W'])
-		m_toolInputCommands.forward = true;
-	else m_toolInputCommands.forward = false;
-	
-	if (m_keyArray['S'])
-		m_toolInputCommands.back = true;
-	else 
-		m_toolInputCommands.back = false;
-
-	if (m_keyArray['A'])
-		m_toolInputCommands.left = true;
-	else
-		m_toolInputCommands.left = false;
-
-	if (m_keyArray['D'])
-		m_toolInputCommands.right = true;
-	else 
-		m_toolInputCommands.right = false;
-
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(forward, Forward)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(back, Back)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(left, Left)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(right, Right)
 	//rotation
-	if (m_keyArray['E'])
-		m_toolInputCommands.rotRight = true;
-	else 
-		m_toolInputCommands.rotRight = false;
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotRight, RotRight)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotLeft, RotLeft)
+	//ArcCamera
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraModeToggle, ArcCameraModeToggle)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(cameraZoomIn, CameraZoomIn)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(cameraZoomOut, CameraZoomOut)
 
-	if (m_keyArray['Q'])
-		m_toolInputCommands.rotLeft = true;
-	else 
-		m_toolInputCommands.rotLeft = false;
-
-	//WASD
+	//Mouse scroll reset
+	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
+	m_mouseArray[(int)MouseInput::WheelRollDown] = false;
 }

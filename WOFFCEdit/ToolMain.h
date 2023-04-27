@@ -41,7 +41,10 @@ private:	//variables
 	Game	m_d3dRenderer;		//Instance of D3D rendering system for our tool
 	InputCommands m_toolInputCommands;		//input commands that we want to use and possibly pass over to the renderer
 	CRect	WindowRECT;		//Window area rectangle. 
+	InputMapping m_inputMapping;
 	char	m_keyArray[256];
+	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
+
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 
 	int m_width;		//dimensions passed to directX
