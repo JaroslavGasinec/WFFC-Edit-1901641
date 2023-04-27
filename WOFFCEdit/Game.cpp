@@ -27,6 +27,7 @@ Game::Game()
 	//functional
 	m_movespeed = 0.30;
 	m_camRotRate = 3.0;
+    m_arcMode = false;
 
 	//camera
 	m_camPosition.x = 0.0f;
@@ -140,16 +141,31 @@ void Game::Tick(InputCommands *Input)
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
+    // Toggle arc mode when requested
+    static bool ToggleBarrier = false;
+    if (m_InputCommands.arcCameraModeToggle && !ToggleBarrier)
+    {
+        m_arcMode = !m_arcMode;
+        ToggleBarrier = true;
+    }
+    else 
+    {
+        ToggleBarrier = false;
+    }
+
 	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
 	//camera motion is on a plane, so kill the 7 component of the look direction
 	Vector3 planarMotionVector = m_camLookDirection;
 	planarMotionVector.y = 0.0;
 
-	if (m_InputCommands.rotRight)
-		m_camOrientation.y -= m_camRotRate;
+    if (m_arcMode)
+    {
+        if (m_InputCommands.rotRight)
+            m_camOrientation.y -= m_camRotRate;
 
-	if (m_InputCommands.rotLeft)
-		m_camOrientation.y += m_camRotRate;
+        if (m_InputCommands.rotLeft)
+            m_camOrientation.y += m_camRotRate;
+    }
 
 	//create look direction from Euler angles in m_camOrientation
 	m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);

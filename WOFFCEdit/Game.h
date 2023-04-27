@@ -79,6 +79,7 @@ private:
 	DirectX::SimpleMath::Vector3		m_camLookDirection;
 	DirectX::SimpleMath::Vector3		m_camRight;
 	float m_camRotRate;
+	bool m_arcMode;
 
 	//control variables
 	bool m_grid;							//grid rendering on / off
