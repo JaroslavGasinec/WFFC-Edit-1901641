@@ -111,7 +111,7 @@
     <ClInclude Include="SelectDialogue.h">
       <Filter>MFC</Filter>
     </ClInclude>
-    <ClInclude Include="\\StuHomeOdd\HomeDrive1$\1901641\CMP-405 tools\WFFC-Edit-1901641\WOFFCEdit\Camera.h">
+    <ClInclude Include="Camera.h">
       <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
