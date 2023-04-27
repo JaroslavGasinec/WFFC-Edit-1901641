@@ -19,7 +19,7 @@ Game::Game()
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_deviceResources->RegisterDeviceNotify(this);
 	m_displayList.clear();
-	
+
 	//initial Settings
 	//modes
 	m_grid = false;
@@ -158,7 +158,8 @@ void Game::Update(DX::StepTimer const& timer)
 	Vector3 planarMotionVector = m_camLookDirection;
 	planarMotionVector.y = 0.0;
 
-    if (m_arcMode)
+    // y axis = yaw
+    if (!m_arcMode)
     {
         if (m_InputCommands.rotRight)
             m_camOrientation.y -= m_camRotRate;

@@ -64,15 +64,15 @@ private:
 
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 
-	//tool specific
+	// Tool specific
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
 	InputCommands						m_InputCommands;
 
-	//functionality
+	// Functionality
 	float								m_movespeed;
 
-	//camera
+	// Camera
 	DirectX::SimpleMath::Vector3		m_camPosition;
 	DirectX::SimpleMath::Vector3		m_camOrientation;
 	DirectX::SimpleMath::Vector3		m_camLookAt;
@@ -81,7 +81,10 @@ private:
 	float m_camRotRate;
 	bool m_arcMode;
 
-	//control variables
+	// Utils memory
+	std::vector<std::shared_ptr<SceneObject>> m_selectedObjects;
+
+	// Control variables
 	bool m_grid;							//grid rendering on / off
 	// Device resources.
     std::shared_ptr<DX::DeviceResources>    m_deviceResources;
