@@ -64,6 +64,7 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::Forward,'W'),
 		std::pair<MAP_PAIR>(Actions::Back,'S'),
 		std::pair<MAP_PAIR>(Actions::Right,'D'),
+		std::pair<MAP_PAIR>(Actions::Left,'A'),
 		std::pair<MAP_PAIR>(Actions::RotRight,'E'),
 		std::pair<MAP_PAIR>(Actions::RotLeft,'Q')
 	};

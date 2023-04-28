@@ -95,7 +95,6 @@ void Camera::CalculateRightVector()
 		m_camRight.x = (-cos(yaw) * sin(pitch) * sin(roll)) - (sin(yaw) * cos(roll));
 		m_camRight.z = (-sin(yaw) * sin(pitch) * sin(roll)) + (cos(yaw) * cos(roll));
 		m_camRight.y = cos(pitch) * sin(roll);
-		m_camRight *= -1;
 		m_camRight.Normalize();
 	}
 }
