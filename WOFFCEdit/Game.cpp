@@ -115,7 +115,8 @@ void Game::Tick(InputCommands *Input)
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    UpdateArcMode();
+    float deltaTime = 1.0f / timer.GetFramesPerSecond();
+	UpdateArcMode();
     m_camera.Update();
 
     // Handle Camera focus
@@ -128,24 +129,24 @@ void Game::Update(DX::StepTimer const& timer)
     if (!m_arcMode)
     {
         if (m_InputCommands.rotRight)
-            m_camera.Rotate(Rotator(0, 0, -m_camRotRate));
+            m_camera.Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
 
         if (m_InputCommands.rotLeft)
-            m_camera.Rotate(Rotator(0, 0, m_camRotRate));
+            m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
     }
 
 	// Handle camera movement
     if (m_InputCommands.forward)
-        m_camera.Move(Vector3(m_movespeed, 0, 0));
+        m_camera.Move(Vector3(m_movespeed * deltaTime, 0, 0));
 
 	if (m_InputCommands.back)
-        m_camera.Move(Vector3(-m_movespeed, 0, 0));
+        m_camera.Move(Vector3(-m_movespeed * deltaTime, 0, 0));
 
 	if (m_InputCommands.right)
-        m_camera.Move(Vector3(0, 0, m_movespeed));
+        m_camera.Move(Vector3(0, 0, m_movespeed * deltaTime));
 
 	if (m_InputCommands.left)
-        m_camera.Move(Vector3(0, 0, -m_movespeed));
+        m_camera.Move(Vector3(0, 0, -m_movespeed * deltaTime));
 
 	//apply camera vectors
     m_view = m_camera.GetLookAtMatrix();
