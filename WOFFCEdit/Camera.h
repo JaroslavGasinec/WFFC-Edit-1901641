@@ -59,7 +59,7 @@ class Camera
 {
 public:
 	Camera();
-	~Camera();
+	~Camera() {};
 
 	void Rotate(const Rotator& offsetAngle);
 	void Move(const Vector3& offset, const bool relative = true);
