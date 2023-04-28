@@ -25,8 +25,8 @@ Game::Game()
 	m_grid = false;
 
 	//functional
-	m_movespeed = 0.30;
-	m_camRotRate = 3.0;
+	m_movespeed = 1.00;
+	m_camRotRate = 20.0;
     m_arcMode = false;
 }
 
@@ -115,7 +115,7 @@ void Game::Tick(InputCommands *Input)
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    float deltaTime = 1.0f / timer.GetFramesPerSecond();
+    float deltaTime = timer.GetFramesPerSecond() != 0 ? 1.0f / timer.GetFramesPerSecond() : 0;
 	UpdateArcMode();
     m_camera.Update();
 

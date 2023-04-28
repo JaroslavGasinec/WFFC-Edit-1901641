@@ -15,6 +15,9 @@ Camera::Camera()
 void Camera::Rotate(const Rotator& offsetAngle)
 {
 	m_camOrientation += offsetAngle;
+	m_camOrientation.Yaw() = fmodf(m_camOrientation.Yaw(),360.0);
+	m_camOrientation.Pitch() = fmodf(m_camOrientation.Pitch(), 360.0);
+	m_camOrientation.Roll() = fmodf(m_camOrientation.Roll(), 360.0);
 }
 
 void Camera::Move(const Vector3& offset, const bool relative)
@@ -25,11 +28,11 @@ void Camera::Move(const Vector3& offset, const bool relative)
 		final = offset.x * m_camLookDirection;
 		final += offset.z * m_camRight;
 		final += offset.y * m_camUp;
-		m_camPosition += final * m_moveSpeed;
+		m_camPosition += final;
 		return;
 	}
 
-	m_camPosition += offset * m_moveSpeed;
+	m_camPosition += offset;
 }
 
 void Camera::SetFocus(std::shared_ptr<SceneObject> focus)
