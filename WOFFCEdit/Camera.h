@@ -1,9 +1,10 @@
 #pragma once
+#define PI 3.14
 #include "DisplayObject.h"
 
-// typedef
-typedef DirectX::SimpleMath::Vector3 Vector3;
-typedef DirectX::SimpleMath::Matrix Matrix;
+// namespaces
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 // forward declarations
 class SceneObject;
@@ -24,6 +25,10 @@ struct Rotator
 	float& Roll() { return data.x; }
 	float& Pitch() { return data.z; }
 	float& Yaw() { return data.y; }
+
+	float RollRad() { return data.x * (PI / 180.0); }
+	float PitchRad() { return data.z * (PI / 180.0); }
+	float YawRad() { return data.y * (PI / 180.0); }
 
 	Rotator operator+ (const Rotator& rhs) 
 	{
@@ -57,27 +62,29 @@ public:
 	~Camera();
 
 	void Rotate(const Rotator& offsetAngle);
-	void Move(const Vector3& offset, const bool relative = false);
+	void Move(const Vector3& offset, const bool relative = true);
 	void SetFocus(std::shared_ptr<SceneObject> focus);
 	void UnsetFocus();
 	void Update();
 
 	Matrix GetLookAtMatrix();
+	const Vector3& GetPosition();
 
 private:
 
 	Vector3 m_camPosition;
 	Rotator m_camOrientation;
-	Vector3 m_camLookAt;
 	Vector3 m_camLookDirection;
 	Vector3 m_camRight;
 	Vector3 m_camUp;
 	float m_moveSpeed;
 	float m_camRotRate;
 
-	std::shared_ptr<SceneObject> m_focusOject;
+	std::shared_ptr<SceneObject> m_focusObject;
 
 	void CalculateLookAtVector();
 	void CalculateRightVector();
 	void CalculateUpVector();
+
+	void RecalculateRotation();
 };

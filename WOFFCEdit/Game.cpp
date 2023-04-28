@@ -28,32 +28,6 @@ Game::Game()
 	m_movespeed = 0.30;
 	m_camRotRate = 3.0;
     m_arcMode = false;
-
-	//camera
-	m_camPosition.x = 0.0f;
-	m_camPosition.y = 3.7f;
-	m_camPosition.z = -3.5f;
-
-	m_camOrientation.x = 0;
-	m_camOrientation.y = 0;
-	m_camOrientation.z = 0;
-
-	m_camLookAt.x = 0.0f;
-	m_camLookAt.y = 0.0f;
-	m_camLookAt.z = 0.0f;
-
-	m_camLookDirection.x = 0.0f;
-	m_camLookDirection.y = 0.0f;
-	m_camLookDirection.z = 0.0f;
-
-	m_camRight.x = 0.0f;
-	m_camRight.y = 0.0f;
-	m_camRight.z = 0.0f;
-
-	m_camOrientation.x = 0.0f;
-	m_camOrientation.y = 0.0f;
-	m_camOrientation.z = 0.0f;
-
 }
 
 Game::~Game()
@@ -141,60 +115,40 @@ void Game::Tick(InputCommands *Input)
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    // Toggle arc mode when requested
-    static bool ToggleBarrier = false;
-    if (m_InputCommands.arcCameraModeToggle && !ToggleBarrier)
-    {
-        m_arcMode = !m_arcMode;
-        ToggleBarrier = true;
-    }
-    else 
-    {
-        ToggleBarrier = false;
-    }
+    UpdateArcMode();
+    m_camera.Update();
 
-	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
-	//camera motion is on a plane, so kill the 7 component of the look direction
-	Vector3 planarMotionVector = m_camLookDirection;
-	planarMotionVector.y = 0.0;
+    // Handle Camera focus
+    if (m_arcMode && m_selectedObjects.size() == 1)
+        m_camera.SetFocus(m_selectedObjects[0]);
+    else
+        m_camera.UnsetFocus();
 
-    // y axis = yaw
+    // Handle camera rotation
     if (!m_arcMode)
     {
         if (m_InputCommands.rotRight)
-            m_camOrientation.y -= m_camRotRate;
+            m_camera.Rotate(Rotator(0, 0, -m_camRotRate));
 
         if (m_InputCommands.rotLeft)
-            m_camOrientation.y += m_camRotRate;
+            m_camera.Rotate(Rotator(0, 0, m_camRotRate));
     }
 
-	//create look direction from Euler angles in m_camOrientation
-	m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.z = cos((m_camOrientation.y)*3.1415 / 180);
-	m_camLookDirection.Normalize();
-
-	//create right vector from look Direction
-	m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
-
-	//process input and update stuff
-	if (m_InputCommands.forward)	
-		m_camPosition += m_camLookDirection*m_movespeed;
+	// Handle camera movement
+    if (m_InputCommands.forward)
+        m_camera.Move(Vector3(m_movespeed, 0, 0));
 
 	if (m_InputCommands.back)
-		m_camPosition -= m_camLookDirection*m_movespeed;
+        m_camera.Move(Vector3(-m_movespeed, 0, 0));
 
 	if (m_InputCommands.right)
-		m_camPosition += m_camRight*m_movespeed;
+        m_camera.Move(Vector3(0, 0, m_movespeed));
 
 	if (m_InputCommands.left)
-		m_camPosition -= m_camRight*m_movespeed;
-
-	//update lookat point
-	m_camLookAt = m_camPosition + m_camLookDirection;
+        m_camera.Move(Vector3(0, 0, -m_movespeed));
 
 	//apply camera vectors
-    m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
-
+    m_view = m_camera.GetLookAtMatrix();
     m_batchEffect->SetView(m_view);
     m_batchEffect->SetWorld(Matrix::Identity);
 	m_displayChunk.m_terrainEffect->SetView(m_view);
@@ -253,7 +207,7 @@ void Game::Render()
 	//CAMERA POSITION ON HUD
 	m_sprites->Begin();
 	WCHAR   Buffer[256];
-	std::wstring var = L"Cam X: " + std::to_wstring(m_camPosition.x) + L"Cam Z: " + std::to_wstring(m_camPosition.z);
+	std::wstring var = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
 	m_font->DrawString(m_sprites.get(), var.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
 	m_sprites->End();
 
@@ -489,6 +443,23 @@ void Game::BuildDisplayChunk(ChunkObject * SceneChunk)
 void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
 {
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
+}
+
+void Game::UpdateArcMode() 
+{
+    // Toggle arc mode when requested
+    static bool ToggleBarrier = false;
+    if (m_InputCommands.arcCameraModeToggle 
+        && !m_selectedObjects.empty() 
+        && !ToggleBarrier)
+    {
+        m_arcMode = !m_arcMode;
+        ToggleBarrier = true;
+    }
+    else if (!m_InputCommands.arcCameraModeToggle)
+    {
+        ToggleBarrier = false;
+    }
 }
 
 #ifdef DXTK_AUDIO
