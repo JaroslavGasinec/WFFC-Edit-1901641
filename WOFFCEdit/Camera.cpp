@@ -82,8 +82,8 @@ void Camera::CalculateLookAtVector()
 	}
 
 	m_camLookDirection.x = m_focusObject->posX - m_camPosition.x;
-	m_camLookDirection.y = m_focusObject->posX - m_camPosition.y;
-	m_camLookDirection.z = m_focusObject->posX - m_camPosition.z;
+	m_camLookDirection.y = m_focusObject->posY - m_camPosition.y;
+	m_camLookDirection.z = m_focusObject->posZ - m_camPosition.z;
 	m_camLookDirection.Normalize();
 }
 
