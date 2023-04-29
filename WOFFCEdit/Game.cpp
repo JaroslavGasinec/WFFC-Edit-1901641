@@ -128,11 +128,20 @@ void Game::Update(DX::StepTimer const& timer)
     // Handle camera rotation
     if (!m_arcMode)
     {
-        if (m_InputCommands.rotRight)
-            m_camera.Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
+       if (m_InputCommands.rotRight)
+           m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime), false);
+       
+       if (m_InputCommands.rotLeft)
+           m_camera.Rotate(Rotator(0, -m_camRotRate * deltaTime, 0));
+       
+       // if (m_InputCommands.cameraZoomIn)
+       //     m_camera.Rotate(Rotator(0, m_camRotRate, 0));
+       //
+       // if (m_InputCommands.cameraZoomOut)
+       //     m_camera.Rotate(Rotator(0, -m_camRotRate, 0));
 
-        if (m_InputCommands.rotLeft)
-            m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
+       // m_camera.Rotate(Rotator(0, 0, -m_camRotRate));
+       //m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
     }
 
 	// Handle camera movement

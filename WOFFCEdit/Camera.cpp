@@ -4,20 +4,32 @@
 Camera::Camera()
 {
 	m_camPosition = Vector3(0, 0, 0);
-	m_camOrientation = Rotator(0, 0, 0);
-	m_camLookDirection = Vector3(1, 0, 0);
-	m_camRight = Vector3(0, 0, 0);
-	m_camUp = Vector3(0, 0, 0);
+	m_camForward = Vector3(1, 0, 0);
+	m_camRight = Vector3(0, 0, 1);
+	m_camUp = Vector3(0, 1, 0);
 	m_moveSpeed = 5;
 	m_camRotRate = 10;
 }
 
-void Camera::Rotate(const Rotator& offsetAngle)
+void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
 {
-	m_camOrientation += offsetAngle;
-	m_camOrientation.Yaw() = fmodf(m_camOrientation.Yaw(),360.0);
-	m_camOrientation.Pitch() = fmodf(m_camOrientation.Pitch(), 360.0);
-	m_camOrientation.Roll() = fmodf(m_camOrientation.Roll(), 360.0);
+	if (relative)
+		m_camRotation = offsetRotation.RotationMatrix() * m_camRotation;
+	else
+		m_camRotation *= offsetRotation.RotationMatrix();
+}
+
+void Camera::Rotate(const Vector3& relativeDirection)
+{
+	Vector3 finalOffset = m_camRight * relativeDirection.z + m_camUp * relativeDirection.y;
+
+	m_camForward += finalOffset;
+	m_camForward.Normalize();
+
+	RecalculateRotation();
+
+	CalculateRightVector();
+	CalculateOrientationVectors();
 }
 
 void Camera::Move(const Vector3& offset, const bool relative)
@@ -25,7 +37,7 @@ void Camera::Move(const Vector3& offset, const bool relative)
 	if (relative)
 	{
 		Vector3 final;
-		final = offset.x * m_camLookDirection;
+		final = offset.x * m_camForward;
 		final += offset.z * m_camRight;
 		final += offset.y * m_camUp;
 		m_camPosition += final;
@@ -48,17 +60,17 @@ void Camera::UnsetFocus()
 
 void Camera::Update()
 {
-	CalculateLookAtVector();
-	if (m_focusObject)
-		RecalculateRotation();
+	CalculateOrientationVectors();
+	//if (m_focusObject)
+		//RecalculateRotation();
 
-	CalculateRightVector();
-	CalculateUpVector();
+	//CalculateRightVector();
+	//CalculateUpVector();
 }
 
 Matrix Camera::GetLookAtMatrix()
 {
-	auto m_camLookAt = m_camPosition + m_camLookDirection;
+	auto m_camLookAt = m_camPosition + m_camForward;
 	return Matrix::CreateLookAt(m_camPosition, m_camLookAt, m_camUp);
 }
 
@@ -67,49 +79,82 @@ const Vector3& Camera::GetPosition()
 	return m_camPosition;
 }
 
-void Camera::CalculateLookAtVector() 
+void Camera::CalculateOrientationVectors() 
 {	
 	if (!m_focusObject)
 	{
-		const float yaw = m_camOrientation.YawRad();
-		const float pitch = m_camOrientation.PitchRad();
+		auto oriantationMatrix = Matrix(
+			Vector3(1, 0, 0),
+			Vector3(0, 0, 1),
+			Vector3(0, 1, 0)
+		);
 
-		m_camLookDirection.x = cos(yaw) * cos(pitch);
-		m_camLookDirection.z = sin(yaw) * cos(pitch);
-		m_camLookDirection.y = sin(pitch);
-		m_camLookDirection.Normalize();
+		oriantationMatrix *= m_camRotation;
+
+		m_camForward.x = oriantationMatrix._11;
+		m_camForward.y = oriantationMatrix._12;
+		m_camForward.z = oriantationMatrix._13;
+		m_camForward.Normalize();
+		m_camRight.x = oriantationMatrix._21;
+		m_camRight.y = oriantationMatrix._22;
+		m_camRight.z = oriantationMatrix._23;
+		m_camRight.Normalize();
+		m_camUp.x = oriantationMatrix._31;
+		m_camUp.y = oriantationMatrix._32;
+		m_camUp.z = oriantationMatrix._33;
+		m_camUp.Normalize();
 		return;
 	}
 
-	m_camLookDirection.x = m_focusObject->posX - m_camPosition.x;
-	m_camLookDirection.y = m_focusObject->posY - m_camPosition.y;
-	m_camLookDirection.z = m_focusObject->posZ - m_camPosition.z;
-	m_camLookDirection.Normalize();
+	m_camForward.x = m_focusObject->posX - m_camPosition.x;
+	m_camForward.y = m_focusObject->posY - m_camPosition.y;
+	m_camForward.z = m_focusObject->posZ - m_camPosition.z;
+	m_camForward.Normalize();
 }
 
 void Camera::CalculateRightVector()
 {
-	const float roll = m_camOrientation.RollRad();
-	const float yaw = m_camOrientation.YawRad();
-	const float pitch = m_camOrientation.PitchRad();
+	//if (!m_focusObject)
+	//{
+		auto rightMatrix = Matrix(
+			Vector3(0, 0, 1),
+			Vector3(0, 0, 0),
+			Vector3(0, 0, 0)
+		);
 
-	if (!m_focusObject)
-	{
-		m_camRight.x = (-cos(yaw) * sin(pitch) * sin(roll)) - (sin(yaw) * cos(roll));
-		m_camRight.z = (-sin(yaw) * sin(pitch) * sin(roll)) + (cos(yaw) * cos(roll));
-		m_camRight.y = cos(pitch) * sin(roll);
+		rightMatrix *= m_camRotation;
+
+		m_camRight.x = rightMatrix._11;
+		m_camRight.y = rightMatrix._12;
+		m_camRight.z = rightMatrix._13;
 		m_camRight.Normalize();
-	}
+		return;
+	//}
 }
 
 void Camera::CalculateUpVector()
 {
-	m_camRight.Cross(m_camLookDirection, m_camUp);
+	m_camRight.Cross(m_camForward, m_camUp);
 }
 
 void Camera::RecalculateRotation()
 {
-	m_camOrientation.Roll() = 0.f;
-	m_camOrientation.Pitch() = acosf(m_camLookDirection.y) * (180 / PI);
-	m_camOrientation.Yaw() = acosf(m_camLookDirection.z) * (180 / PI);
+	//m_camOrientation.Roll() = 0.f;
+	//m_camOrientation.Pitch() = asinf(-m_camForward.y) * (180 / PI);
+	//m_camOrientation.Yaw() = atanf(m_camForward.z/ m_camForward.x) * (180 / PI);
+
+	
+	// Pitch alterations
+	//if (m_camForward.z < 0)
+	//	m_camOrientation.Pitch() = 180 - m_camOrientation.Pitch();
+	//
+	//if (m_camForward.x < 0)
+	//	m_camOrientation.Pitch() *= -1;
+	//
+	//// Yaw alterations
+	//if (m_camForward.x < 0)
+	//	m_camOrientation.Yaw() = 180 - m_camOrientation.Yaw();
+	//
+	//if (m_camForward.y < 0)
+	//	m_camOrientation.Yaw() *= -1;
 }

@@ -309,6 +309,11 @@ void ToolMain::UpdateInput(MSG* msg)
 				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
 			else if (GET_WHEEL_DELTA_WPARAM(msg->wParam) < 0)
 				m_mouseArray[(int)MouseInput::WheelRollDown] = true;
+			else
+			{
+				m_mouseArray[(int)MouseInput::WheelRollUp] = false;
+				m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+			}
 
 			break;
 
