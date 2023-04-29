@@ -60,7 +60,8 @@ public:
 private:
 
 	void Update(DX::StepTimer const& timer);
-
+	void RenderChunk();
+	void RenderUI();
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 

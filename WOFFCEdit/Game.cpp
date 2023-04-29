@@ -194,6 +194,49 @@ void Game::Update(DX::StepTimer const& timer)
 #pragma endregion
 
 #pragma region Frame Render
+void Game::RenderChunk()
+{
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    int numRenderObjects = m_displayList.size();
+    for (int i = 0; i < numRenderObjects; i++)
+    {
+        m_deviceResources->PIXBeginEvent(L"Draw model");
+        const XMVECTORF32 scale = { m_displayList[i].m_scale.x, m_displayList[i].m_scale.y, m_displayList[i].m_scale.z };
+        const XMVECTORF32 translate = { m_displayList[i].m_position.x, m_displayList[i].m_position.y, m_displayList[i].m_position.z };
+
+        //convert degrees into radians for rotation matrix
+        XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y * 3.1415 / 180,
+            m_displayList[i].m_orientation.x * 3.1415 / 180,
+            m_displayList[i].m_orientation.z * 3.1415 / 180);
+
+        XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
+
+        m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);	//last variable in draw,  make TRUE for wireframe
+
+        m_deviceResources->PIXEndEvent();
+    }
+
+    m_deviceResources->PIXEndEvent();
+
+    //RENDER TERRAIN
+    context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(m_states->DepthDefault(), 0);
+    context->RSSetState(m_states->CullNone());
+    //	context->RSSetState(m_states->Wireframe());		//uncomment for wireframe
+
+	//Render the batch,  This is handled in the Display chunk becuase it has the potential to get complex
+    m_displayChunk.RenderBatch(m_deviceResources);
+}
+
+void Game::RenderUI()
+{
+    m_sprites->Begin();
+    WCHAR   Buffer[256];
+    std::wstring camPos = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
+    m_font->DrawString(m_sprites.get(), camPos.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
+    m_sprites->End();
+}
+
 // Draws the scene.
 void Game::Render()
 {
@@ -214,43 +257,11 @@ void Game::Render()
 		DrawGrid(xaxis, yaxis, g_XMZero, 512, 512, Colors::Gray);
 	}
 
-	//CAMERA POSITION ON HUD
-	m_sprites->Begin();
-	WCHAR   Buffer[256];
-	std::wstring var = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
-	m_font->DrawString(m_sprites.get(), var.c_str() , XMFLOAT2(100, 10), Colors::Yellow);
-	m_sprites->End();
-
 	//RENDER OBJECTS FROM SCENEGRAPH
-	int numRenderObjects = m_displayList.size();
-	for (int i = 0; i < numRenderObjects; i++)
-	{
-		m_deviceResources->PIXBeginEvent(L"Draw model");
-		const XMVECTORF32 scale = { m_displayList[i].m_scale.x, m_displayList[i].m_scale.y, m_displayList[i].m_scale.z };
-		const XMVECTORF32 translate = { m_displayList[i].m_position.x, m_displayList[i].m_position.y, m_displayList[i].m_position.z };
+    RenderChunk();
 
-		//convert degrees into radians for rotation matrix
-		XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y *3.1415 / 180,
-															m_displayList[i].m_orientation.x *3.1415 / 180,
-															m_displayList[i].m_orientation.z *3.1415 / 180);
-
-		XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
-
-		m_displayList[i].m_model->Draw(context, *m_states, local, m_view, m_projection, false);	//last variable in draw,  make TRUE for wireframe
-
-		m_deviceResources->PIXEndEvent();
-	}
-
-    m_deviceResources->PIXEndEvent();
-
-	//RENDER TERRAIN
-	context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
-	context->OMSetDepthStencilState(m_states->DepthDefault(),0);
-	context->RSSetState(m_states->CullNone());
-//	context->RSSetState(m_states->Wireframe());		//uncomment for wireframe
-
-	//Render the batch,  This is handled in the Display chunk becuase it has the potential to get complex
-	m_displayChunk.RenderBatch(m_deviceResources);
+    //CAMERA POSITION ON HUD
+    RenderUI();
 
     m_deviceResources->Present();
 }
