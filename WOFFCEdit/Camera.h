@@ -141,5 +141,8 @@ private:
 	void CalculateRightVector();
 	void CalculateUpVector();
 
-	void RecalculateRotation();
+	Matrix RotationFromForward();
+
+public:
+	Rotator RotatorFromForward();
 };

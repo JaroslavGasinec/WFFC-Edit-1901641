@@ -26,7 +26,7 @@ void Camera::Rotate(const Vector3& relativeDirection)
 	m_camForward += finalOffset;
 	m_camForward.Normalize();
 
-	RecalculateRotation();
+	RotationFromForward();
 
 	CalculateRightVector();
 	CalculateOrientationVectors();
@@ -62,7 +62,7 @@ void Camera::Update()
 {
 	CalculateOrientationVectors();
 	//if (m_focusObject)
-		//RecalculateRotation();
+		//RotationFromForward();
 
 	//CalculateRightVector();
 	//CalculateUpVector();
@@ -137,24 +137,32 @@ void Camera::CalculateUpVector()
 	m_camRight.Cross(m_camForward, m_camUp);
 }
 
-void Camera::RecalculateRotation()
+Matrix Camera::RotationFromForward()
 {
-	//m_camOrientation.Roll() = 0.f;
-	//m_camOrientation.Pitch() = asinf(-m_camForward.y) * (180 / PI);
-	//m_camOrientation.Yaw() = atanf(m_camForward.z/ m_camForward.x) * (180 / PI);
+	return RotatorFromForward().RotationMatrix();
+}
 
-	
+Rotator Camera::RotatorFromForward()
+{
+	Rotator delta;
+
+	delta.Roll() = 0;
+	delta.Pitch() = atanf(m_camForward.y / m_camForward.x) * (180.0f / PI);
+	delta.Yaw() = atanf(m_camForward.z / m_camForward.x) * (180.0f / PI);
+
 	// Pitch alterations
-	//if (m_camForward.z < 0)
-	//	m_camOrientation.Pitch() = 180 - m_camOrientation.Pitch();
-	//
-	//if (m_camForward.x < 0)
-	//	m_camOrientation.Pitch() *= -1;
-	//
-	//// Yaw alterations
-	//if (m_camForward.x < 0)
-	//	m_camOrientation.Yaw() = 180 - m_camOrientation.Yaw();
-	//
-	//if (m_camForward.y < 0)
-	//	m_camOrientation.Yaw() *= -1;
+	if (m_camForward.z < 0)
+		delta.Pitch() = 180 - delta.Pitch();
+
+	if (m_camForward.x < 0)
+		delta.Pitch() *= -1;
+
+	// Yaw alterations
+	if (m_camForward.x < 0)
+		delta.Yaw() = 180 - delta.Yaw();
+
+	if (m_camForward.y < 0)
+		delta.Yaw() *= -1;
+
+	return delta;
 }
