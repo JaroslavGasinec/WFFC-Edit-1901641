@@ -61,21 +61,6 @@ struct Rotator
 		);
 	}
 
-	static Matrix RotationAboutAxis(const float a, Vector3 v)
-	{
-		const float cosA = cosf(a);
-		const float sinA = sinf(a);
-		v.Normalize();
-
-		Matrix out = Matrix(
-			Vector3(cosA + pow(v.x, 2) * (1 - cosA), v.x * v.y * (1 - cosA) - v.z * sinA, v.x * v.z * (1 - cosA) + v.y * sinA),
-			Vector3(v.y * v.x * (1 - cosA) + v.z * sinA, cosA + pow(v.y, 2) * (1 - cosA), v.y * v.z * (1 - cosA) - v.x * sinA),
-			Vector3(v.z * v.x * (1 - cosA) - v.y * sinA, v.z * v.y * (1 - cosA) + v.x * sinA, cosA + pow(v.z, 2) * (1 - cosA))
-		);
-
-		return out;
-	}
-
 	Matrix RotationMatrix() const
 	{
 		Matrix out = RollMatrix();
@@ -107,6 +92,96 @@ struct Rotator
 	{
 		data -= rhs.data;
 	}
+	
+	static Matrix RotationAboutAxis(const float a, Vector3 v)
+	{
+		const float cosA = cosf(a);
+		const float sinA = sinf(a);
+		v.Normalize();
+
+		Matrix out = Matrix(
+			Vector3(cosA + pow(v.x, 2) * (1 - cosA), v.x * v.y * (1 - cosA) - v.z * sinA, v.x * v.z * (1 - cosA) + v.y * sinA),
+			Vector3(v.y * v.x * (1 - cosA) + v.z * sinA, cosA + pow(v.y, 2) * (1 - cosA), v.y * v.z * (1 - cosA) - v.x * sinA),
+			Vector3(v.z * v.x * (1 - cosA) - v.y * sinA, v.z * v.y * (1 - cosA) + v.x * sinA, cosA + pow(v.z, 2) * (1 - cosA))
+		);
+
+		return out;
+	}
+
+	// x = forward, y = yaw, z = right
+	static Rotator RotatorFromVector(const Vector3& v)
+	{
+		Rotator out;
+
+		out.Roll() = 0;
+		out.Pitch() = asinf(v.y / v.Length()) * (180.0f / PI);
+		out.Yaw() = atanf(-v.z / v.x) * (180.0f / PI);
+		float shadowPitch = atanf(v.y / v.x) * (180.0f / PI);
+
+		static auto AngleCleanup = [&](float& angle, const float& x, const float& y)
+		{
+			// default comparisons
+			if (x == 0)
+			{
+				if (y > 0)
+					angle = 90.f;
+				else
+					angle = 270.f;
+
+				return;
+			}
+
+			if (y == 0)
+			{
+				if (x > 0)
+					angle = 0.f;
+				else
+					angle = 180.f;
+
+				return;
+			}
+
+			// quadrant based cleanup
+			int quadrant = 0;
+			if (x > 0 && y > 0)
+				quadrant = 1;
+			else if (x < 0 && y > 0)
+				quadrant = 2;
+			else if (x < 0 && y < 0)
+				quadrant = 3;
+			else
+				quadrant = 4;
+
+			switch(quadrant)
+			{
+				case 0:
+					angle = 0;
+					return;
+				case 1:
+					return;
+				case 2:
+					angle = 180 - angle;
+					return;
+				case 3:
+					angle += 180;
+					return;
+				case 4:
+					angle = 360 - angle;
+					return;
+			}
+		};
+
+		AngleCleanup(shadowPitch, v.x, v.y);
+		const float pitchXAxis = sqrt(v.x * v.x + v.z * v.z) * ((shadowPitch > 90 && shadowPitch < 270) ? -1 : 1);
+
+		out.Pitch() = fabsf(out.C_Pitch());
+		out.Yaw() = fabsf(out.C_Yaw());
+
+		AngleCleanup(out.Pitch(), pitchXAxis, v.y);
+		AngleCleanup(out.Yaw(), v.x, -v.z);
+
+		return out;
+	}
 };
 
 class Camera
@@ -137,6 +212,7 @@ private:
 
 	std::shared_ptr<SceneObject> m_focusObject;
 
+	void ForwardToFocus();
 	void CalculateOrientationVectors();
 	void CalculateRightVector();
 	void CalculateUpVector();

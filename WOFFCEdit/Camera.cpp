@@ -79,57 +79,52 @@ const Vector3& Camera::GetPosition()
 	return m_camPosition;
 }
 
-void Camera::CalculateOrientationVectors() 
-{	
-	if (!m_focusObject)
-	{
-		auto oriantationMatrix = Matrix(
-			Vector3(1, 0, 0),
-			Vector3(0, 0, 1),
-			Vector3(0, 1, 0)
-		);
-
-		oriantationMatrix *= m_camRotation;
-
-		m_camForward.x = oriantationMatrix._11;
-		m_camForward.y = oriantationMatrix._12;
-		m_camForward.z = oriantationMatrix._13;
-		m_camForward.Normalize();
-		m_camRight.x = oriantationMatrix._21;
-		m_camRight.y = oriantationMatrix._22;
-		m_camRight.z = oriantationMatrix._23;
-		m_camRight.Normalize();
-		m_camUp.x = oriantationMatrix._31;
-		m_camUp.y = oriantationMatrix._32;
-		m_camUp.z = oriantationMatrix._33;
-		m_camUp.Normalize();
-		return;
-	}
-
+void Camera::ForwardToFocus()
+{
 	m_camForward.x = m_focusObject->posX - m_camPosition.x;
 	m_camForward.y = m_focusObject->posY - m_camPosition.y;
 	m_camForward.z = m_focusObject->posZ - m_camPosition.z;
 	m_camForward.Normalize();
 }
 
+void Camera::CalculateOrientationVectors() 
+{	
+	auto oriantationMatrix = Matrix(
+		Vector3(1, 0, 0),
+		Vector3(0, 0, 1),
+		Vector3(0, 1, 0)
+	);
+
+	oriantationMatrix *= m_camRotation;
+
+	m_camForward.x = oriantationMatrix._11;
+	m_camForward.y = oriantationMatrix._12;
+	m_camForward.z = oriantationMatrix._13;
+	m_camForward.Normalize();
+	m_camRight.x = oriantationMatrix._21;
+	m_camRight.y = oriantationMatrix._22;
+	m_camRight.z = oriantationMatrix._23;
+	m_camRight.Normalize();
+	m_camUp.x = oriantationMatrix._31;
+	m_camUp.y = oriantationMatrix._32;
+	m_camUp.z = oriantationMatrix._33;
+	m_camUp.Normalize();
+}
+
 void Camera::CalculateRightVector()
 {
-	//if (!m_focusObject)
-	//{
-		auto rightMatrix = Matrix(
-			Vector3(0, 0, 1),
-			Vector3(0, 0, 0),
-			Vector3(0, 0, 0)
-		);
+	auto rightMatrix = Matrix(
+		Vector3(0, 0, 1),
+		Vector3(0, 0, 0),
+		Vector3(0, 0, 0)
+	);
 
-		rightMatrix *= m_camRotation;
+	rightMatrix *= m_camRotation;
 
-		m_camRight.x = rightMatrix._11;
-		m_camRight.y = rightMatrix._12;
-		m_camRight.z = rightMatrix._13;
-		m_camRight.Normalize();
-		return;
-	//}
+	m_camRight.x = rightMatrix._11;
+	m_camRight.y = rightMatrix._12;
+	m_camRight.z = rightMatrix._13;
+	m_camRight.Normalize();
 }
 
 void Camera::CalculateUpVector()
@@ -144,25 +139,5 @@ Matrix Camera::RotationFromForward()
 
 Rotator Camera::RotatorFromForward()
 {
-	Rotator delta;
-
-	delta.Roll() = 0;
-	delta.Pitch() = atanf(m_camForward.y / m_camForward.x) * (180.0f / PI);
-	delta.Yaw() = atanf(m_camForward.z / m_camForward.x) * (180.0f / PI);
-
-	// Pitch alterations
-	if (m_camForward.z < 0)
-		delta.Pitch() = 180 - delta.Pitch();
-
-	if (m_camForward.x < 0)
-		delta.Pitch() *= -1;
-
-	// Yaw alterations
-	if (m_camForward.x < 0)
-		delta.Yaw() = 180 - delta.Yaw();
-
-	if (m_camForward.y < 0)
-		delta.Yaw() *= -1;
-
-	return delta;
+	return Rotator::RotatorFromVector(m_camForward);
 }
