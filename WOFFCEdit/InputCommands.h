@@ -44,7 +44,7 @@ enum class Actions : int
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
 	ArcCameraActionsStart = ArcCameraModeToggle,
-	ArcCameraActionsEnd = ArcCameraModeToggle
+	ArcCameraActionsEnd = ArcCameraZoomOut
 };
 
 enum class MouseInput : int
