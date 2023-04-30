@@ -368,6 +368,8 @@ void ToolMain::UpdateInput(MSG* msg)
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotLeft, RotLeft)
 	//ArcCamera
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraModeToggle, ArcCameraModeToggle)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomIn, ArcCameraZoomIn)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomOut, ArcCameraZoomOut)
 
 	//Mouse scroll reset
 	m_mouseArray[(int)MouseInput::WheelRollUp] = false;

@@ -25,7 +25,8 @@ Game::Game()
 	m_grid = false;
 
 	//functional
-	m_movespeed = 1.00;
+	m_camMoveSpeed = 1.00;
+    m_camZoomSpeed = 5.00;
 	m_camRotRate = 20.0;
     m_arcMode = false;
 }
@@ -126,42 +127,44 @@ void Game::Update(DX::StepTimer const& timer)
         m_camera.UnsetFocus();
 
     // Handle camera rotation
-    if (!m_arcMode)
+    //JERRY TODO: PENDING OBJECT SELECTION
+    //if (!m_arcMode)
+    if (m_arcMode)
     {
-       if (m_InputCommands.rotRight)
-           m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime), true);
-       
-       if (m_InputCommands.rotLeft)
-           m_camera.Rotate(Rotator(0, -m_camRotRate * deltaTime, 0));
-       
-       // if (m_InputCommands.cameraZoomIn)
-       //     m_camera.Rotate(Rotator(0, m_camRotRate, 0));
-       //
-       // if (m_InputCommands.cameraZoomOut)
-       //     m_camera.Rotate(Rotator(0, -m_camRotRate, 0));
+		if (m_InputCommands.rotRight)
+			m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime));
 
-       // m_camera.Rotate(Rotator(0, 0, -m_camRotRate));
-       //m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
+    	if (m_InputCommands.rotLeft)
+            m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
+
+        // Handle non-arc mode movement
+    	if (m_InputCommands.forward)
+            m_camera.Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
+
+    	if (m_InputCommands.back)
+            m_camera.Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
+    }
+    else
+    {
+        if (m_InputCommands.arcCameraZoomIn)
+			m_camera.ArcZoomIn(m_camZoomSpeed * deltaTime);
+
+        if (m_InputCommands.arcCameraZoomOut)
+            m_camera.ArcZoomIn(-m_camZoomSpeed * deltaTime);
     }
 
 	// Handle camera movement
-    if (m_InputCommands.forward)
-        m_camera.Move(Vector3(m_movespeed * deltaTime, 0, 0));
-
-	if (m_InputCommands.back)
-        m_camera.Move(Vector3(-m_movespeed * deltaTime, 0, 0));
-
 	if (m_InputCommands.right)
-        m_camera.Move(Vector3(0, 0, m_movespeed * deltaTime));
+        m_camera.Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
 
 	if (m_InputCommands.left)
-        m_camera.Move(Vector3(0, 0, -m_movespeed * deltaTime));
+        m_camera.Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
 
     if (m_InputCommands.up)
-        m_camera.Move(Vector3(0, m_movespeed * deltaTime, 0));
+        m_camera.Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
 
     if (m_InputCommands.down)
-        m_camera.Move(Vector3(0, -m_movespeed * deltaTime, 0));
+        m_camera.Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
 
 	//apply camera vectors
     m_view = m_camera.GetLookAtMatrix();
@@ -238,18 +241,15 @@ void Game::RenderUI()
 {
     m_sprites->Begin();
     WCHAR   Buffer[256];
-    //auto rotation = m_camera.RotatorFromForward();
     std::wstring camPos = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
     std::wstring camFor = L"Forward: X: " + std::to_wstring(m_camera.m_camForward.x) + L" Y: " + std::to_wstring(m_camera.m_camForward.y) + L" Z: " + std::to_wstring(m_camera.m_camForward.z);
     std::wstring camRig = L"Right: X: " + std::to_wstring(m_camera.m_camRight.x) + L" Y: " + std::to_wstring(m_camera.m_camRight.y) + L" Z: " + std::to_wstring(m_camera.m_camRight.z);
     std::wstring camUp = L"Up: X: " + std::to_wstring(m_camera.m_camUp.x) + L" Y: " + std::to_wstring(m_camera.m_camUp.y) + L" Z: " + std::to_wstring(m_camera.m_camUp.z);
 
-   // std::wstring camRot = L"Cam Pitch: " + std::to_wstring(rotation.Pitch()) + L"Cam Yaw: " + std::to_wstring(rotation.Yaw());
     m_font->DrawString(m_sprites.get(), camPos.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
     m_font->DrawString(m_sprites.get(), camFor.c_str(), XMFLOAT2(100, 30), Colors::Yellow);
     m_font->DrawString(m_sprites.get(), camRig.c_str(), XMFLOAT2(100, 50), Colors::Yellow);
     m_font->DrawString(m_sprites.get(), camUp.c_str(), XMFLOAT2(100, 70), Colors::Yellow);
-   // m_font->DrawString(m_sprites.get(), camRot.c_str(), XMFLOAT2(100, 30), Colors::Yellow);
     m_sprites->End();
 }
 
@@ -460,11 +460,7 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 		newDisplayObject.m_light_quadratic	= SceneGraph->at(i).light_quadratic;
 		
 		m_displayList.push_back(newDisplayObject);
-		
 	}
-		
-		
-		
 }
 
 void Game::BuildDisplayChunk(ChunkObject * SceneChunk)

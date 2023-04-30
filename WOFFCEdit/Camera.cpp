@@ -13,6 +13,7 @@ Camera::Camera()
 	m_focusObject->posX = 0;
 	m_focusObject->posY = 0;
 	m_focusObject->posZ = 0;
+	m_arcZoom = 1;
 }
 
 void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
@@ -51,8 +52,12 @@ void Camera::UnsetFocus()
 
 void Camera::Update()
 {
+	//JERRY TODO: PENDING OBJECT SELECTION
 	//if (m_focusObject)
 		CalculateOrientationFromFocus();
+		//auto focusObjectPos = Vector3(m_focusObject->posX, m_focusObject->posY, m_focusObject->posY);
+		auto focusObjectPos = Vector3(1, 1, 1);
+		m_camPosition = focusObjectPos - (m_camForward * m_arcZoom);
 	//else
 		//CalculateOrientationVectors();
 }
@@ -70,6 +75,7 @@ const Vector3& Camera::GetPosition()
 
 void Camera::CalculateOrientationFromFocus()
 {
+	//JERRY TODO: PENDING OBJECT SELECTION
 	//m_camForward.x = m_focusObject->posX - m_camPosition.x;
 	//m_camForward.y = m_focusObject->posY - m_camPosition.y;
 	//m_camForward.z = m_focusObject->posZ - m_camPosition.z;
@@ -78,11 +84,13 @@ void Camera::CalculateOrientationFromFocus()
 	m_camForward.z = 1 - m_camPosition.z;
 	m_camForward.Normalize();
 
+	// Decipher Yaw First, as rotations are applied in Roll, Pitch, Yaw order
 	float yawRad = abs(atanf(m_camForward.z/m_camForward.x) * (180 / PI));
 	Rotator::CleanupAngle(yawRad, m_camForward.x, -m_camForward.z);
 	//Rotate clockwise
 	Rotator yawRotation = Rotator(0, 0, yawRad);
 
+	// Undo Yaw from forward vector
 	Matrix vector = Matrix(
 		m_camForward,
 		Vector3(0,0,0),
@@ -90,11 +98,13 @@ void Camera::CalculateOrientationFromFocus()
 	);
 	vector *= yawRotation.YawMatrix();
 
+	// Decipher Pitch next
 	float pitchRad = abs(atanf(vector._12 / vector._11) * (180 / PI));
 	Rotator::CleanupAngle(pitchRad, vector._11, vector._12);
 	//Rotate clockwise
 	Rotator pitchRotation = Rotator(0, pitchRad, 0);
 
+	// Apply the deciphered rotations to the up and right vectors
 	auto rightUpMatrix = Matrix(
 		Vector3(0, 0, 1),
 		Vector3(0, 1, 0),
@@ -161,4 +171,15 @@ void Camera::CalculateRightVector()
 void Camera::CalculateUpVector()
 {
 	m_camRight.Cross(m_camForward, m_camUp);
+}
+
+void Camera::ArcZoomIn(const float offset)
+{
+	static const float minimumZoom = 0.2;
+	m_arcZoom = std::max(minimumZoom, m_arcZoom + offset);
+}
+
+void Camera::ArcZoomReset()
+{
+	m_arcZoom = 1;
 }

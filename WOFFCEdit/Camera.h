@@ -171,6 +171,8 @@ public:
 
 	void Rotate(const Rotator& offsetRotation, const bool relative = false);
 	void Move(const Vector3& offset, const bool relative = true);
+	void ArcZoomIn(const float offset);
+	void ArcZoomReset();
 	void SetFocus(std::shared_ptr<SceneObject> focus);
 	void UnsetFocus();
 	void Update();
@@ -178,7 +180,7 @@ public:
 	Matrix GetLookAtMatrix();
 	const Vector3& GetPosition();
 
-private:
+//private:
 public:
 	Vector3 m_camPosition;
 	Vector3 m_camForward;
@@ -188,6 +190,7 @@ public:
 	Rotator m_rotation;
 	float m_moveSpeed;
 	float m_camRotRate;
+	float m_arcZoom;
 
 	std::shared_ptr<SceneObject> m_focusObject;
 

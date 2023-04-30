@@ -72,13 +72,12 @@ private:
 	DisplayChunk						m_displayChunk;
 	InputCommands						m_InputCommands;
 
-	// Functionality
-	float								m_movespeed;
-
 	// Camera
-	float m_camRotRate;
+	float  m_camMoveSpeed;
+	float  m_camZoomSpeed;
+	float  m_camRotRate;
 	Camera m_camera;
-	bool m_arcMode;
+	bool   m_arcMode;
 
 	// Utils memory
 	std::vector<std::shared_ptr<SceneObject>> m_selectedObjects;
@@ -128,8 +127,6 @@ private:
     DirectX::SimpleMath::Matrix                                             m_world;
     DirectX::SimpleMath::Matrix                                             m_view;
     DirectX::SimpleMath::Matrix                                             m_projection;
-
-
 };
 
 std::wstring StringToWCHART(std::string s);

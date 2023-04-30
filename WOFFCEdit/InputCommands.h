@@ -16,6 +16,8 @@ struct InputCommands
 
 	// Arc Camera
 	bool arcCameraModeToggle;
+	bool arcCameraZoomIn;
+	bool arcCameraZoomOut;
 
 	void ResetState() 
 	{
@@ -36,6 +38,8 @@ enum class Actions : int
 	RotLeft,
 	// Arc Camera
 	ArcCameraModeToggle,
+	ArcCameraZoomIn,
+	ArcCameraZoomOut,
 	// Flags
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
@@ -73,7 +77,9 @@ struct InputMapping
 
 #define MAP_PAIR Actions,MouseInput
 	std::map<MAP_PAIR> mouseMapping = {
-		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown)
+		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
+		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
+		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp)
 	};
 #undef MAP_PAIR
 
