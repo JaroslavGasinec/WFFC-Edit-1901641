@@ -1,33 +1,6 @@
 #pragma once
 #include <map>
 
-struct InputCommands
-{
-	// old
-
-	bool forward;
-	bool back;
-	bool right;
-	bool left;
-	bool up;
-	bool down;
-	bool rotRight;
-	bool rotLeft;
-
-	// Arc Camera
-	bool arcCameraModeToggle;
-	bool arcCameraZoomIn;
-	bool arcCameraZoomOut;
-
-	// Object Selection
-	bool selectObject;
-
-	void ResetState() 
-	{
-		ZeroMemory(this, sizeof(this));
-	}
-};
-
 enum class Actions : int
 {
 	// Old
@@ -46,6 +19,7 @@ enum class Actions : int
 	// Object Selection
 	SelectObject,
 	// Flags
+	MaxNum,
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
 	ArcCameraActionsStart = ArcCameraModeToggle,
@@ -65,6 +39,28 @@ enum class MouseInput : int
 	MouseMoveDown,
 	// Flags
 	MouseDigitalInputEnd = WheelRollDown
+};
+
+struct InputCommands
+{
+	// old
+
+	bool actionBuffer[(int)Actions::MaxNum];
+
+	bool GetState(const Actions action)
+	{
+		return actionBuffer[(int)action];
+	}
+
+	void SetState(const Actions action)
+	{
+		actionBuffer[(int)action] = true;
+	}
+
+	void ResetState()
+	{
+		ZeroMemory(this, sizeof(this));
+	}
 };
 
 struct InputMapping 
