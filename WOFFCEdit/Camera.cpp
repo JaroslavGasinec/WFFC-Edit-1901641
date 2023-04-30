@@ -14,9 +14,9 @@ Camera::Camera()
 void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
 {
 	if (relative)
-		m_camRotation = offsetRotation.RotationMatrix() * m_camRotation;
+		m_relativeRotation += offsetRotation;
 	else
-		m_camRotation *= offsetRotation.RotationMatrix();
+		m_rotation += offsetRotation;
 }
 
 void Camera::Rotate(const Vector3& relativeDirection)
@@ -25,8 +25,6 @@ void Camera::Rotate(const Vector3& relativeDirection)
 
 	m_camForward += finalOffset;
 	m_camForward.Normalize();
-
-	RotationFromForward();
 
 	CalculateRightVector();
 	CalculateOrientationVectors();
@@ -61,6 +59,7 @@ void Camera::UnsetFocus()
 void Camera::Update()
 {
 	CalculateOrientationVectors();
+	//CalculateOrientationVectors();
 	//if (m_focusObject)
 		//RotationFromForward();
 
@@ -89,25 +88,26 @@ void Camera::ForwardToFocus()
 
 void Camera::CalculateOrientationVectors() 
 {	
-	auto oriantationMatrix = Matrix(
+	auto orientationMatrix = Matrix(
 		Vector3(1, 0, 0),
 		Vector3(0, 0, 1),
 		Vector3(0, 1, 0)
 	);
 
-	oriantationMatrix *= m_camRotation;
+	orientationMatrix *= m_relativeRotation.RotationMatrix();
+	orientationMatrix *= m_rotation.RotationMatrix();
 
-	m_camForward.x = oriantationMatrix._11;
-	m_camForward.y = oriantationMatrix._12;
-	m_camForward.z = oriantationMatrix._13;
+	m_camForward.x = orientationMatrix._11;
+	m_camForward.y = orientationMatrix._12;
+	m_camForward.z = orientationMatrix._13;
 	m_camForward.Normalize();
-	m_camRight.x = oriantationMatrix._21;
-	m_camRight.y = oriantationMatrix._22;
-	m_camRight.z = oriantationMatrix._23;
+	m_camRight.x = orientationMatrix._21;
+	m_camRight.y = orientationMatrix._22;
+	m_camRight.z = orientationMatrix._23;
 	m_camRight.Normalize();
-	m_camUp.x = oriantationMatrix._31;
-	m_camUp.y = oriantationMatrix._32;
-	m_camUp.z = oriantationMatrix._33;
+	m_camUp.x = orientationMatrix._31;
+	m_camUp.y = orientationMatrix._32;
+	m_camUp.z = orientationMatrix._33;
 	m_camUp.Normalize();
 }
 
@@ -119,7 +119,8 @@ void Camera::CalculateRightVector()
 		Vector3(0, 0, 0)
 	);
 
-	rightMatrix *= m_camRotation;
+	rightMatrix *= m_relativeRotation.RotationMatrix();
+	rightMatrix *= m_rotation.RotationMatrix();
 
 	m_camRight.x = rightMatrix._11;
 	m_camRight.y = rightMatrix._12;
@@ -130,14 +131,4 @@ void Camera::CalculateRightVector()
 void Camera::CalculateUpVector()
 {
 	m_camRight.Cross(m_camForward, m_camUp);
-}
-
-Matrix Camera::RotationFromForward()
-{
-	return RotatorFromForward().RotationMatrix();
-}
-
-Rotator Camera::RotatorFromForward()
-{
-	return Rotator::RotatorFromVector(m_camForward);
 }

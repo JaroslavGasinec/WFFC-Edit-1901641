@@ -129,7 +129,7 @@ void Game::Update(DX::StepTimer const& timer)
     if (!m_arcMode)
     {
        if (m_InputCommands.rotRight)
-           m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime), false);
+           m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime), true);
        
        if (m_InputCommands.rotLeft)
            m_camera.Rotate(Rotator(0, -m_camRotRate * deltaTime, 0));
@@ -232,11 +232,11 @@ void Game::RenderUI()
 {
     m_sprites->Begin();
     WCHAR   Buffer[256];
-    auto rotation = m_camera.RotatorFromForward();
+    //auto rotation = m_camera.RotatorFromForward();
     std::wstring camPos = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
-    std::wstring camRot = L"Cam Pitch: " + std::to_wstring(rotation.Pitch()) + L"Cam Yaw: " + std::to_wstring(rotation.Yaw());
+   // std::wstring camRot = L"Cam Pitch: " + std::to_wstring(rotation.Pitch()) + L"Cam Yaw: " + std::to_wstring(rotation.Yaw());
     m_font->DrawString(m_sprites.get(), camPos.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
-    m_font->DrawString(m_sprites.get(), camRot.c_str(), XMFLOAT2(100, 30), Colors::Yellow);
+   // m_font->DrawString(m_sprites.get(), camRot.c_str(), XMFLOAT2(100, 30), Colors::Yellow);
     m_sprites->End();
 }
 
