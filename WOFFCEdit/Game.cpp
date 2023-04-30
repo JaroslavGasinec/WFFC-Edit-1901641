@@ -131,39 +131,39 @@ void Game::Update(DX::StepTimer const& timer)
     //if (!m_arcMode)
     if (m_arcMode)
     {
-		if (m_InputCommands.rotRight)
+		if (m_InputCommands.GetState(Actions::RotRight))
 			m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime));
 
-    	if (m_InputCommands.rotLeft)
+    	if (m_InputCommands.GetState(Actions::RotLeft))
             m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
 
         // Handle non-arc mode movement
-    	if (m_InputCommands.forward)
+    	if (m_InputCommands.GetState(Actions::Forward))
             m_camera.Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
 
-    	if (m_InputCommands.back)
+    	if (m_InputCommands.GetState(Actions::Back))
             m_camera.Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
     }
     else
     {
-        if (m_InputCommands.arcCameraZoomIn)
+        if (m_InputCommands.GetState(Actions::ArcCameraZoomIn))
 			m_camera.ArcZoomIn(m_camZoomSpeed * deltaTime);
 
-        if (m_InputCommands.arcCameraZoomOut)
+        if (m_InputCommands.GetState(Actions::ArcCameraZoomOut))
             m_camera.ArcZoomIn(-m_camZoomSpeed * deltaTime);
     }
 
 	// Handle camera movement
-	if (m_InputCommands.right)
+	if (m_InputCommands.GetState(Actions::Right))
         m_camera.Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
 
-	if (m_InputCommands.left)
+	if (m_InputCommands.GetState(Actions::Left))
         m_camera.Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
 
-    if (m_InputCommands.up)
+    if (m_InputCommands.GetState(Actions::Up))
         m_camera.Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
 
-    if (m_InputCommands.down)
+    if (m_InputCommands.GetState(Actions::Down))
         m_camera.Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
 
 	//apply camera vectors
@@ -482,14 +482,14 @@ void Game::UpdateArcMode()
 {
     // Toggle arc mode when requested
     static bool ToggleBarrier = false;
-    if (m_InputCommands.arcCameraModeToggle 
+    if (m_InputCommands.GetState(Actions::ArcCameraModeToggle) 
         && !m_selectedObjects.empty() 
         && !ToggleBarrier)
     {
         m_arcMode = !m_arcMode;
         ToggleBarrier = true;
     }
-    else if (!m_InputCommands.arcCameraModeToggle)
+    else if (!m_InputCommands.GetState(Actions::ArcCameraModeToggle))
     {
         ToggleBarrier = false;
     }

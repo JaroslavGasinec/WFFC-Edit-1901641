@@ -289,7 +289,7 @@ void ToolMain::Tick(MSG *msg)
 
 void ToolMain::UpdateInput(MSG* msg)
 {
-
+	m_toolInputCommands.ResetState();
 	switch (msg->message)
 	{
 		//Global inputs,  mouse position and keys etc
@@ -343,35 +343,16 @@ void ToolMain::UpdateInput(MSG* msg)
 	}
 
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
-#define RESOLVE_BOOL_COMMAND_FROM_ACTION(actionVal, actionEnum) \
-	{ \
-		auto mapping = m_inputMapping.GetMapping(Actions::##actionEnum); \
-		if (mapping.charId >= 0) \
-		{ \
-			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; \
-			if (inputActive) \
-				m_toolInputCommands.##actionVal = true; \
-			else \
-				m_toolInputCommands.##actionVal = false; \
-		} \
+	for(int i = 0; i < (int)Actions::MaxNum; i++)
+	{
+		auto mapping = m_inputMapping.GetMapping((Actions)i); 
+		if (mapping.charId >= 0) 
+		{ 
+			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
+			if (inputActive) 
+				m_toolInputCommands.SetState((Actions)i); 
+		}
 	}
-
-	//WASD EQ movement
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(forward, Forward)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(back, Back)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(left, Left)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(right, Right)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(up, Up)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(down, Down)
-	//rotation
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotRight, RotRight)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotLeft, RotLeft)
-	//ArcCamera
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraModeToggle, ArcCameraModeToggle)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomIn, ArcCameraZoomIn)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomOut, ArcCameraZoomOut)
-	//ObjectSelection
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(selectObject, SelectObject)
 
 	//Mouse scroll reset
 	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
