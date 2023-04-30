@@ -9,13 +9,13 @@ struct InputCommands
 	bool back;
 	bool right;
 	bool left;
+	bool up;
+	bool down;
 	bool rotRight;
 	bool rotLeft;
 
 	// Arc Camera
 	bool arcCameraModeToggle;
-	bool cameraZoomIn;
-	bool cameraZoomOut;
 
 	void ResetState() 
 	{
@@ -30,18 +30,17 @@ enum class Actions : int
 	Back,
 	Right,
 	Left,
+	Up,
+	Down,
 	RotRight,
 	RotLeft,
 	// Arc Camera
 	ArcCameraModeToggle,
-	ArcCameraModeEnd,
-	CameraZoomIn,
-	CameraZoomOut,
 	// Flags
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
 	ArcCameraActionsStart = ArcCameraModeToggle,
-	ArcCameraActionsEnd = CameraZoomOut,
+	ArcCameraActionsEnd = ArcCameraModeToggle
 };
 
 enum class MouseInput : int
@@ -65,16 +64,16 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::Back,'S'),
 		std::pair<MAP_PAIR>(Actions::Right,'D'),
 		std::pair<MAP_PAIR>(Actions::Left,'A'),
-		std::pair<MAP_PAIR>(Actions::RotRight,'E'),
-		std::pair<MAP_PAIR>(Actions::RotLeft,'Q')
+		std::pair<MAP_PAIR>(Actions::Up,'Q'),
+		std::pair<MAP_PAIR>(Actions::Down,'E'),
+		std::pair<MAP_PAIR>(Actions::RotRight,'Z'),
+		std::pair<MAP_PAIR>(Actions::RotLeft,'X')
 	};
 #undef MAP_PAIR
 
 #define MAP_PAIR Actions,MouseInput
 	std::map<MAP_PAIR> mouseMapping = {
-		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
-		std::pair<MAP_PAIR>(Actions::CameraZoomIn, MouseInput::WheelRollUp),
-		std::pair<MAP_PAIR>(Actions::CameraZoomOut, MouseInput::WheelRollDown)
+		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown)
 	};
 #undef MAP_PAIR
 

@@ -9,6 +9,10 @@ Camera::Camera()
 	m_camUp = Vector3(0, 1, 0);
 	m_moveSpeed = 5;
 	m_camRotRate = 10;
+	m_focusObject = std::make_shared<SceneObject>();
+	m_focusObject->posX = 0;
+	m_focusObject->posY = 0;
+	m_focusObject->posZ = 0;
 }
 
 void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
@@ -17,17 +21,6 @@ void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
 		m_relativeRotation += offsetRotation;
 	else
 		m_rotation += offsetRotation;
-}
-
-void Camera::Rotate(const Vector3& relativeDirection)
-{
-	Vector3 finalOffset = m_camRight * relativeDirection.z + m_camUp * relativeDirection.y;
-
-	m_camForward += finalOffset;
-	m_camForward.Normalize();
-
-	CalculateRightVector();
-	CalculateOrientationVectors();
 }
 
 void Camera::Move(const Vector3& offset, const bool relative)
@@ -58,13 +51,10 @@ void Camera::UnsetFocus()
 
 void Camera::Update()
 {
-	CalculateOrientationVectors();
-	//CalculateOrientationVectors();
 	//if (m_focusObject)
-		//RotationFromForward();
-
-	//CalculateRightVector();
-	//CalculateUpVector();
+		CalculateOrientationFromFocus();
+	//else
+		//CalculateOrientationVectors();
 }
 
 Matrix Camera::GetLookAtMatrix()
@@ -78,12 +68,52 @@ const Vector3& Camera::GetPosition()
 	return m_camPosition;
 }
 
-void Camera::ForwardToFocus()
+void Camera::CalculateOrientationFromFocus()
 {
-	m_camForward.x = m_focusObject->posX - m_camPosition.x;
-	m_camForward.y = m_focusObject->posY - m_camPosition.y;
-	m_camForward.z = m_focusObject->posZ - m_camPosition.z;
+	//m_camForward.x = m_focusObject->posX - m_camPosition.x;
+	//m_camForward.y = m_focusObject->posY - m_camPosition.y;
+	//m_camForward.z = m_focusObject->posZ - m_camPosition.z;
+	m_camForward.x = 1 - m_camPosition.x;
+	m_camForward.y = 1 - m_camPosition.y;
+	m_camForward.z = 1 - m_camPosition.z;
 	m_camForward.Normalize();
+
+	float yawRad = abs(atanf(m_camForward.z/m_camForward.x) * (180 / PI));
+	Rotator::CleanupAngle(yawRad, m_camForward.x, -m_camForward.z);
+	//Rotate clockwise
+	Rotator yawRotation = Rotator(0, 0, yawRad);
+
+	Matrix vector = Matrix(
+		m_camForward,
+		Vector3(0,0,0),
+		Vector3(0,0,0)
+	);
+	vector *= yawRotation.YawMatrix();
+
+	float pitchRad = abs(atanf(vector._12 / vector._11) * (180 / PI));
+	Rotator::CleanupAngle(pitchRad, vector._11, vector._12);
+	//Rotate clockwise
+	Rotator pitchRotation = Rotator(0, pitchRad, 0);
+
+	auto rightUpMatrix = Matrix(
+		Vector3(0, 0, 1),
+		Vector3(0, 1, 0),
+		Vector3(0, 0, 0)
+	);
+
+	pitchRotation.Pitch() = -pitchRotation.Pitch();
+	rightUpMatrix *= pitchRotation.RotationMatrix();
+	yawRotation.Yaw() = -yawRotation.Yaw();
+	rightUpMatrix *= yawRotation.RotationMatrix();
+
+	m_camRight.x = rightUpMatrix._11;
+	m_camRight.y = rightUpMatrix._12;
+	m_camRight.z = rightUpMatrix._13;
+	m_camRight.Normalize();
+	m_camUp.x = rightUpMatrix._21;
+	m_camUp.y = rightUpMatrix._22;
+	m_camUp.z = rightUpMatrix._23;
+	m_camUp.Normalize();
 }
 
 void Camera::CalculateOrientationVectors() 

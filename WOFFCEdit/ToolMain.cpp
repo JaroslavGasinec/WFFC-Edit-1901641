@@ -356,18 +356,18 @@ void ToolMain::UpdateInput(MSG* msg)
 		} \
 	}
 
-	//WASD movement
+	//WASD EQ movement
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(forward, Forward)
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(back, Back)
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(left, Left)
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(right, Right)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(up, Up)
+	RESOLVE_BOOL_COMMAND_FROM_ACTION(down, Down)
 	//rotation
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotRight, RotRight)
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotLeft, RotLeft)
 	//ArcCamera
 	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraModeToggle, ArcCameraModeToggle)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(cameraZoomIn, CameraZoomIn)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(cameraZoomOut, CameraZoomOut)
 
 	//Mouse scroll reset
 	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
