@@ -52,9 +52,9 @@ struct InputCommands
 		return m_actionBuffer[(int)action];
 	}
 
-	void SetState(const Actions action)
+	void SetState(const Actions action, const bool state = true)
 	{
-		m_actionBuffer[(int)action] = true;
+		m_actionBuffer[(int)action] = state;
 	}
 
 	void ResetState()

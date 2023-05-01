@@ -295,7 +295,6 @@ void ToolMain::Tick(MSG *msg)
 
 void ToolMain::UpdateInput(MSG* msg)
 {
-	m_toolInputCommands.ResetState();
 	switch (msg->message)
 	{
 		//Global inputs,  mouse position and keys etc
@@ -308,6 +307,8 @@ void ToolMain::UpdateInput(MSG* msg)
 			break;
 
 		case WM_MOUSEMOVE:
+			m_toolInputCommands.m_mousePos[0] = GET_X_LPARAM(msg->lParam);
+			m_toolInputCommands.m_mousePos[1] = GET_Y_LPARAM(msg->lParam);
 			break;
 
 		case WM_MOUSEWHEEL:
@@ -356,7 +357,9 @@ void ToolMain::UpdateInput(MSG* msg)
 		{ 
 			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
 			if (inputActive) 
-				m_toolInputCommands.SetState((Actions)i); 
+				m_toolInputCommands.SetState((Actions)i);
+			else
+				m_toolInputCommands.SetState((Actions)i, false);
 		}
 	}
 
@@ -394,6 +397,7 @@ void ToolMain::HandleInputSelectObject()
 			m_toolInputCommands.m_mousePos[0],
 			m_toolInputCommands.m_mousePos[1]))
 		{
+			//JERRY TODO: Problem here
 			if (std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
 				m_selectedObjects.push_back(testResult);
 		}

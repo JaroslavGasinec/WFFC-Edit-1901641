@@ -59,6 +59,8 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+    GetClientRect(window, &m_ScreenDimensions);
+
 #ifdef DXTK_AUDIO
     // Create DirectXTK for Audio objects
     AUDIO_ENGINE_FLAGS eflags = AudioEngine_Default;
@@ -121,7 +123,6 @@ std::shared_ptr<Camera> Game::GetCamera()
 void Game::Update(DX::StepTimer const& timer)
 {
     const float RenderDeltaTime = timer.GetFramesPerSecond() != 0 ? 1.0f / timer.GetFramesPerSecond() : 0;
-    SetCameraFocus();
 	m_camera.Update();
     m_camera.HandleInput(RenderDeltaTime, m_InputCommands);
 
@@ -131,7 +132,7 @@ void Game::Update(DX::StepTimer const& timer)
     m_batchEffect->SetWorld(Matrix::Identity);
 	m_displayChunk.m_terrainEffect->SetView(m_view);
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
-
+    m_InputCommands.ResetState();
 #ifdef DXTK_AUDIO
     m_audioTimerAcc -= (float)timer.GetElapsedSeconds();
     if (m_audioTimerAcc < 0)
@@ -437,7 +438,7 @@ void Game::SaveDisplayChunk(ChunkObject* SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
-void Game::SetCameraFocus(std::shared_ptr<SceneObject> focusObject)
+void Game::SetCameraFocus(DisplayObject* focusObject)
 {
     if (focusObject)
     {
@@ -448,9 +449,53 @@ void Game::SetCameraFocus(std::shared_ptr<SceneObject> focusObject)
 	m_camera.UnsetFocus();
 }
 
-std::shared_ptr<SceneObject> Game::PerformRayTest(const float screenX, const float screenY)
+DisplayObject* Game::PerformRayTest(const float screenX, const float screenY)
 {
-    return nullptr;
+    DisplayObject* intersected = nullptr;
+    float distanceFromStart = 0;
+    float smallestDistance = 100;
+
+    //setup near and far planes of frustum with mouse X and mouse y passed down from Toolmain. 
+    //they may look the same but note, the difference in Z
+    const XMVECTOR nearSource = XMVectorSet(screenX, screenY, 0.0f, 1.0f);
+    const XMVECTOR farSource = XMVectorSet(screenX, screenY, 1.0f, 1.0f);
+
+    //Loop through entire display list of objects and pick with each in turn. 
+    for (auto it : m_displayList)
+    {
+        //Get the scale factor and translation of the object
+        const XMVECTORF32 scale = { it.m_scale.x, it.m_scale.y, it.m_scale.z };
+        const XMVECTORF32 translate = { it.m_position.x, it.m_position.y, it.m_position.z };
+
+        //convert euler angles into a quaternion for the rotation of the object
+        XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(it.m_orientation.y * PI / 180, it.m_orientation.x * PI / 180,
+            it.m_orientation.z * PI / 180);
+
+        //create set the matrix of the selected object in the world based on the translation, scale and rotation.
+        XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
+
+        //Unproject the points on the near and far plane, with respect to the matrix we just created.
+        XMVECTOR nearPoint = XMVector3Unproject(nearSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, local);
+        XMVECTOR farPoint = XMVector3Unproject(farSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, local);
+
+        //Turn the transformed points into our picking vector. 
+        XMVECTOR unprojectedRay = farPoint - nearPoint;
+        unprojectedRay = XMVector3Normalize(unprojectedRay);
+
+        //loop through mesh list for object
+        for (const auto &itMesh : it.m_model.get()->meshes)
+        {
+            //checking for ray intersection
+            if (itMesh->boundingBox.Intersects(nearPoint, unprojectedRay, distanceFromStart)
+                && distanceFromStart <= smallestDistance)
+            { 
+                smallestDistance = distanceFromStart;
+                intersected = &it;
+            }
+        }
+    }
+
+    return intersected;
 }
 
 #ifdef DXTK_AUDIO

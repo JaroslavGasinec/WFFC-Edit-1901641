@@ -51,8 +51,8 @@ public:
 	void BuildDisplayChunk(ChunkObject *SceneChunk);
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
-	void SetCameraFocus(std::shared_ptr<SceneObject> focusObject = nullptr);
-	std::shared_ptr<SceneObject> PerformRayTest(const float screenX, const float screenY);
+	void SetCameraFocus(DisplayObject* focusObject = nullptr);
+	DisplayObject* PerformRayTest(const float screenX, const float screenY);
 	std::shared_ptr<Camera> GetCamera();
 
 #ifdef DXTK_AUDIO
@@ -73,7 +73,7 @@ private:
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
 	InputCommands						m_InputCommands;
-
+	RECT                                m_ScreenDimensions;
 	// Camera
 	float  m_camMoveSpeed;
 	float  m_camZoomSpeed;
