@@ -448,6 +448,11 @@ void Game::SetCameraFocus(std::shared_ptr<SceneObject> focusObject)
 	m_camera.UnsetFocus();
 }
 
+std::shared_ptr<SceneObject> Game::PerformRayTest(const float screenX, const float screenY)
+{
+    return nullptr;
+}
+
 #ifdef DXTK_AUDIO
 void Game::NewAudioDevice()
 {
