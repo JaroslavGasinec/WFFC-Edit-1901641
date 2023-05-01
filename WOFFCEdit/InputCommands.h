@@ -45,16 +45,17 @@ struct InputCommands
 {
 	// old
 
-	bool actionBuffer[(int)Actions::MaxNum];
+	bool m_actionBuffer[(int)Actions::MaxNum];
+	long m_mousePos[2] = { 0,0 };
 
 	bool GetState(const Actions action) const
 	{
-		return actionBuffer[(int)action];
+		return m_actionBuffer[(int)action];
 	}
 
 	void SetState(const Actions action)
 	{
-		actionBuffer[(int)action] = true;
+		m_actionBuffer[(int)action] = true;
 	}
 
 	void ResetState()
