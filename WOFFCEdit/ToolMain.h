@@ -44,7 +44,7 @@ private:	//variables
 	InputMapping m_inputMapping;
 	char	m_keyArray[256];
 	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
-	std::vector<DisplayObject*> m_selectedObjects;
+	std::vector<int> m_selectedObjects;
 
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 

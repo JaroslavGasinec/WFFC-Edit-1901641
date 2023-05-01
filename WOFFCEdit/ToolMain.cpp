@@ -388,20 +388,23 @@ void ToolMain::HandleInputSelectObject()
 {
 	if (m_toolInputCommands.GetState(Actions::SelectObject))
 	{
-		if (auto testResult = m_d3dRenderer.PerformRayTest(
+		const int testResult = m_d3dRenderer.PerformRayTest(
 			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1]))
+			m_toolInputCommands.m_mousePos[1]);
+
+		if (testResult >= 0
+			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
 		{
-			//JERRY TODO: Problem here
-			if (std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
-				m_selectedObjects.push_back(testResult);
+			m_selectedObjects.push_back(testResult);
 		}
 	}
 	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
 	{
-		if (auto testResult = m_d3dRenderer.PerformRayTest(
+		const auto testResult = m_d3dRenderer.PerformRayTest(
 			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1]))
+			m_toolInputCommands.m_mousePos[1]);
+
+		if (testResult >= 0)
 		{
 			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult);
 			if (item != m_selectedObjects.end())
