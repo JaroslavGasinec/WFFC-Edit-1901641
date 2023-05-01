@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
-
+#include <Core.h>
 //
 //ToolMain Class
 ToolMain::ToolMain()
@@ -15,7 +15,9 @@ ToolMain::ToolMain()
 	m_databaseConnection = NULL;
 
 	//zero input commands
-	m_toolInputCommands.ResetState();	
+	m_toolInputCommands.ResetState();
+
+	Gensys::Initialise();
 }
 
 

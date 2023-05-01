@@ -1,7 +1,6 @@
 #include "MFCMain.h"
 #include "resource.h"
 
-
 BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_QUIT,	&MFCMain::MenuFileQuit)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
