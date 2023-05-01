@@ -26,6 +26,7 @@ public: //methods
 	void	Tick(MSG *msg);
 	void	UpdateInput(MSG *msg);
 	void	HandleInputCameraFocus();
+	void	HandleInputSelectObject();
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk

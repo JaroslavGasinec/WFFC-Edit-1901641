@@ -2,6 +2,7 @@
 #include "resource.h"
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 //
 //ToolMain Class
@@ -282,6 +283,9 @@ void ToolMain::Tick(MSG *msg)
 		//add to scenegraph
 		//resend scenegraph to Direct X renderer
 
+	//Object Selection
+	HandleInputSelectObject();
+
 	//Set camera focus if applicable
 	HandleInputCameraFocus();
 
@@ -379,5 +383,19 @@ void ToolMain::HandleInputCameraFocus()
 	else if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
 	{
 		ToggleBarrier = false;
+	}
+}
+
+void ToolMain::HandleInputSelectObject()
+{
+	if (!m_toolInputCommands.GetState(Actions::SelectObject))
+		return;
+
+	if (auto testResult = m_d3dRenderer.PerformRayTest(
+		m_toolInputCommands.m_mousePos[0],
+		m_toolInputCommands.m_mousePos[1]))
+	{
+		if(std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
+			m_selectedObjects.push_back(testResult);
 	}
 }
