@@ -18,6 +18,7 @@ enum class Actions : int
 	ArcCameraZoomOut,
 	// Object Selection
 	SelectObject,
+	DeselectObject,
 	// Flags
 	MaxNum,
 	OldActionsStart = Forward,
@@ -25,7 +26,7 @@ enum class Actions : int
 	ArcCameraActionsStart = ArcCameraModeToggle,
 	ArcCameraActionsEnd = ArcCameraZoomOut,
 	ObjectSelectionStart = SelectObject,
-	ObjectSelectionEnd = SelectObject
+	ObjectSelectionEnd = DeselectObject
 };
 
 enum class MouseInput : int
@@ -43,8 +44,6 @@ enum class MouseInput : int
 
 struct InputCommands
 {
-	// old
-
 	bool m_actionBuffer[(int)Actions::MaxNum];
 	long m_mousePos[2] = { 0,0 };
 
@@ -85,6 +84,7 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp),
 		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::LButtonDown),
+		std::pair<MAP_PAIR>(Actions::DeselectObject, MouseInput::RButtonDown),
 	};
 #undef MAP_PAIR
 

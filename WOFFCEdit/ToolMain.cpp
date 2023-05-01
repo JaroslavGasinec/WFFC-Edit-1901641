@@ -388,14 +388,25 @@ void ToolMain::HandleInputCameraFocus()
 
 void ToolMain::HandleInputSelectObject()
 {
-	if (!m_toolInputCommands.GetState(Actions::SelectObject))
-		return;
-
-	if (auto testResult = m_d3dRenderer.PerformRayTest(
-		m_toolInputCommands.m_mousePos[0],
-		m_toolInputCommands.m_mousePos[1]))
+	if (m_toolInputCommands.GetState(Actions::SelectObject))
 	{
-		if(std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
-			m_selectedObjects.push_back(testResult);
+		if (auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]))
+		{
+			if (std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
+				m_selectedObjects.push_back(testResult);
+		}
+	}
+	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
+	{
+		if (auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]))
+		{
+			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult);
+			if (item != m_selectedObjects.end())
+				m_selectedObjects.erase(item);
+		}
 	}
 }
