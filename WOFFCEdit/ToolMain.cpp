@@ -352,7 +352,7 @@ void ToolMain::UpdateInput(MSG* msg)
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
 	for(int i = 0; i < (int)Actions::MaxNum; i++)
 	{
-		auto mapping = m_inputMapping.GetMapping((Actions)i); 
+		const auto mapping = m_inputMapping.GetMapping((Actions)i); 
 		if (mapping.charId >= 0) 
 		{ 
 			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
@@ -388,27 +388,33 @@ void ToolMain::HandleInputSelectObject()
 {
 	if (m_toolInputCommands.GetState(Actions::SelectObject))
 	{
-		const int testResult = m_d3dRenderer.PerformRayTest(
+		auto testResult = m_d3dRenderer.PerformRayTest(
 			m_toolInputCommands.m_mousePos[0],
 			m_toolInputCommands.m_mousePos[1]);
 
-		if (testResult >= 0
-			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult) == m_selectedObjects.end())
+		// Store only Id as the DisplayList memory allocation addresses etc. get changed
+		// This makes the underlying object pointer unreliable
+		if (testResult.Id >= 0
+			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id) == m_selectedObjects.end())
 		{
-			m_selectedObjects.push_back(testResult);
+			m_selectedObjects.push_back(testResult.Id);
+			testResult.obj->MarkSelected();
 		}
 	}
 	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
 	{
-		const auto testResult = m_d3dRenderer.PerformRayTest(
+		auto testResult = m_d3dRenderer.PerformRayTest(
 			m_toolInputCommands.m_mousePos[0],
 			m_toolInputCommands.m_mousePos[1]);
 
-		if (testResult >= 0)
+		if (testResult.Id >= 0)
 		{
-			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult);
+			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id);
 			if (item != m_selectedObjects.end())
+			{
 				m_selectedObjects.erase(item);
+				testResult.obj->UnmarkSelected();
+			}
 		}
 	}
 }

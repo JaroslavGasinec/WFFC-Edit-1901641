@@ -507,9 +507,9 @@ void Game::SetCameraFocus(const int focusObject)
 	m_camera.UnsetFocus();
 }
 
-int Game::PerformRayTest(const float screenX, const float screenY) const
+Game::RayTestResult Game::PerformRayTest(const float screenX, const float screenY)
 {
-    int intersected = -1;
+    RayTestResult intersected;
     float distanceFromStart = 0;
     float smallestDistance = 100;
 
@@ -519,7 +519,7 @@ int Game::PerformRayTest(const float screenX, const float screenY) const
     const XMVECTOR farSource = XMVectorSet(screenX, screenY, 1.0f, 1.0f);
 
     //Loop through entire display list of objects and pick with each in turn. 
-    for (auto it : m_displayList)
+    for (auto& it : m_displayList)
     {
         //Get the scale factor and translation of the object
         const XMVECTORF32 scale = { it.m_scale.x, it.m_scale.y, it.m_scale.z };
@@ -541,14 +541,15 @@ int Game::PerformRayTest(const float screenX, const float screenY) const
         unprojectedRay = XMVector3Normalize(unprojectedRay);
 
         //loop through mesh list for object
-        for (const auto &itMesh : it.m_model.get()->meshes)
+        for (const auto& itMesh : it.m_model.get()->meshes)
         {
             //checking for ray intersection
             if (itMesh->boundingBox.Intersects(nearPoint, unprojectedRay, distanceFromStart)
                 && distanceFromStart <= smallestDistance)
             { 
                 smallestDistance = distanceFromStart;
-                intersected = it.m_ID;
+                intersected.Id = it.m_ID;
+                intersected.obj = &it;
             }
         }
     }

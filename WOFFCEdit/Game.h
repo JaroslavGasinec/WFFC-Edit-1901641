@@ -53,7 +53,13 @@ public:
 	void CommitDisplayChanges(std::vector<SceneObject>& sceneData);
 	void ClearDisplayList();
 	void SetCameraFocus(const int focusObject = -1);
-	int PerformRayTest(const float screenX, const float screenY) const;
+
+	struct RayTestResult
+	{
+		DisplayObject* obj = nullptr;
+		int Id = -1;
+	};
+	RayTestResult PerformRayTest(const float screenX, const float screenY);
 	std::shared_ptr<Camera> GetCamera();
 
 #ifdef DXTK_AUDIO

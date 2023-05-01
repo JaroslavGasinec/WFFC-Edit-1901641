@@ -29,5 +29,8 @@ public:
 
 	// marking for commits
 	bool m_pendingCommit = false;
+
+	void MarkSelected() {};
+	void UnmarkSelected() {};
 };
 
