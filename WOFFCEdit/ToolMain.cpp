@@ -418,3 +418,8 @@ void ToolMain::HandleInputSelectObject()
 		}
 	}
 }
+
+void ToolMain::HandleInputModifyObject()
+{
+	// send request to renderer for list of object or even have renderer modify things
+}
