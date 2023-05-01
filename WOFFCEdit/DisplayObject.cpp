@@ -30,3 +30,21 @@ DisplayObject::~DisplayObject()
 {
 //	delete m_texture_diffuse;
 }
+
+void DisplayObject::Move(const Vector3 &worldOffset)
+{
+	m_position += worldOffset;
+	m_pendingCommit = true;
+}
+
+void DisplayObject::Rotate(const Vector3 &offsetRotation)
+{
+	m_orientation += offsetRotation;
+	m_pendingCommit = true;
+}
+
+void DisplayObject::Scale(const Vector3& offsetScale)
+{
+	m_scale += offsetScale;
+	m_pendingCommit = true;
+}
