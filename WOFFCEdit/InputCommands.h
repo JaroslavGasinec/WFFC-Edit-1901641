@@ -1,30 +1,6 @@
 #pragma once
 #include <map>
 
-struct InputCommands
-{
-	// old
-
-	bool forward;
-	bool back;
-	bool right;
-	bool left;
-	bool up;
-	bool down;
-	bool rotRight;
-	bool rotLeft;
-
-	// Arc Camera
-	bool arcCameraModeToggle;
-	bool arcCameraZoomIn;
-	bool arcCameraZoomOut;
-
-	void ResetState() 
-	{
-		ZeroMemory(this, sizeof(this));
-	}
-};
-
 enum class Actions : int
 {
 	// Old
@@ -40,11 +16,17 @@ enum class Actions : int
 	ArcCameraModeToggle,
 	ArcCameraZoomIn,
 	ArcCameraZoomOut,
+	// Object Selection
+	SelectObject,
+	DeselectObject,
 	// Flags
+	MaxNum,
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
 	ArcCameraActionsStart = ArcCameraModeToggle,
-	ArcCameraActionsEnd = ArcCameraZoomOut
+	ArcCameraActionsEnd = ArcCameraZoomOut,
+	ObjectSelectionStart = SelectObject,
+	ObjectSelectionEnd = DeselectObject
 };
 
 enum class MouseInput : int
@@ -58,6 +40,31 @@ enum class MouseInput : int
 	MouseMoveDown,
 	// Flags
 	MouseDigitalInputEnd = WheelRollDown
+};
+
+struct InputCommands
+{
+	bool m_actionBuffer[(int)Actions::MaxNum];
+	long m_mousePos[2] = { 0,0 };
+
+	bool GetState(const Actions action, const bool consume = true)
+	{
+		bool out = m_actionBuffer[(int)action];
+		if (consume)
+			m_actionBuffer[(int)action] = false;
+
+		return out;
+	}
+
+	void SetState(const Actions action, const bool state = true)
+	{
+		m_actionBuffer[(int)action] = state;
+	}
+
+	void ResetState()
+	{
+		ZeroMemory(this, sizeof(this));
+	}
 };
 
 struct InputMapping 
@@ -79,7 +86,9 @@ struct InputMapping
 	std::map<MAP_PAIR> mouseMapping = {
 		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
-		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp)
+		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp),
+		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::LButtonDown),
+		std::pair<MAP_PAIR>(Actions::DeselectObject, MouseInput::RButtonDown),
 	};
 #undef MAP_PAIR
 

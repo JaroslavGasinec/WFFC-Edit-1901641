@@ -7,12 +7,10 @@ Camera::Camera()
 	m_camForward = Vector3(1, 0, 0);
 	m_camRight = Vector3(0, 0, 1);
 	m_camUp = Vector3(0, 1, 0);
-	m_moveSpeed = 5;
+	m_camMoveSpeed = 5;
+	m_camZoomSpeed = 5;
 	m_camRotRate = 10;
-	m_focusObject = std::make_shared<SceneObject>();
-	m_focusObject->posX = 0;
-	m_focusObject->posY = 0;
-	m_focusObject->posZ = 0;
+	m_focusObject = nullptr;
 	m_arcZoom = 1;
 }
 
@@ -39,7 +37,7 @@ void Camera::Move(const Vector3& offset, const bool relative)
 	m_camPosition += offset;
 }
 
-void Camera::SetFocus(std::shared_ptr<SceneObject> focus)
+void Camera::SetFocus(DisplayObject* focus)
 {
 	if (focus)
 		m_focusObject = focus;
@@ -50,16 +48,63 @@ void Camera::UnsetFocus()
 	m_focusObject = nullptr;
 }
 
+bool Camera::HasFocus()
+{
+	return m_focusObject != nullptr;
+}
+
 void Camera::Update()
 {
-	//JERRY TODO: PENDING OBJECT SELECTION
-	//if (m_focusObject)
+	if (m_focusObject)
+	{
 		CalculateOrientationFromFocus();
-		//auto focusObjectPos = Vector3(m_focusObject->posX, m_focusObject->posY, m_focusObject->posY);
-		auto focusObjectPos = Vector3(1, 1, 1);
+		auto focusObjectPos = m_focusObject->m_position;
 		m_camPosition = focusObjectPos - (m_camForward * m_arcZoom);
-	//else
-		//CalculateOrientationVectors();
+	}
+	else
+	{
+		CalculateOrientationVectors();
+	}
+}
+
+void Camera::HandleInput(const float deltaTime, InputCommands& input)
+{
+	if (!m_focusObject)
+	{
+		if (input.GetState(Actions::RotRight, false))
+			Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
+
+		if (input.GetState(Actions::RotLeft, false))
+			Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
+
+		// Handle non-arc mode movement
+		if (input.GetState(Actions::Forward, false))
+			Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
+
+		if (input.GetState(Actions::Back, false))
+			Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
+	}
+	else
+	{
+		if (input.GetState(Actions::ArcCameraZoomIn))
+			ArcZoomIn(m_camZoomSpeed * deltaTime);
+
+		if (input.GetState(Actions::ArcCameraZoomOut))
+			ArcZoomIn(-m_camZoomSpeed * deltaTime);
+	}
+
+	// Handle camera movement
+	if (input.GetState(Actions::Right, false))
+		Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
+
+	if (input.GetState(Actions::Left, false))
+		Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
+
+	if (input.GetState(Actions::Up, false))
+		Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
+
+	if (input.GetState(Actions::Down, false))
+		Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
 }
 
 Matrix Camera::GetLookAtMatrix()
@@ -75,16 +120,10 @@ const Vector3& Camera::GetPosition()
 
 void Camera::CalculateOrientationFromFocus()
 {
-	//JERRY TODO: PENDING OBJECT SELECTION
-	//m_camForward.x = m_focusObject->posX - m_camPosition.x;
-	//m_camForward.y = m_focusObject->posY - m_camPosition.y;
-	//m_camForward.z = m_focusObject->posZ - m_camPosition.z;
-	m_camForward.x = 1 - m_camPosition.x;
-	m_camForward.y = 1 - m_camPosition.y;
-	m_camForward.z = 1 - m_camPosition.z;
+	m_camForward = m_focusObject->m_position - m_camPosition;
 	m_camForward.Normalize();
 
-	// Decipher Yaw First, as rotations are applied in Roll, Pitch, Yaw order
+	// Decipher Yaw First, as camera rotations are applied in Roll, Pitch, Yaw order
 	float yawRad = abs(atanf(m_camForward.z/m_camForward.x) * (180 / PI));
 	Rotator::CleanupAngle(yawRad, m_camForward.x, -m_camForward.z);
 	//Rotate clockwise

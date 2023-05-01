@@ -10,7 +10,6 @@
 #include "MFCFrame.h"
 #include "SelectDialogue.h"
 
-
 class MFCMain : public CWinApp 
 {
 public:

@@ -2,6 +2,7 @@
 #include "resource.h"
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 //
 //ToolMain Class
@@ -26,7 +27,6 @@ ToolMain::~ToolMain()
 
 int ToolMain::getCurrentSelectionID()
 {
-
 	return m_selectedObject;
 }
 
@@ -137,7 +137,6 @@ void ToolMain::onActionLoad()
 		newSceneObject.light_constant = sqlite3_column_double(pResults, 53);
 		newSceneObject.light_linear = sqlite3_column_double(pResults, 54);
 		newSceneObject.light_quadratic = sqlite3_column_double(pResults, 55);
-	
 
 		//send completed object to scenegraph
 		m_sceneGraph.push_back(newSceneObject);
@@ -148,7 +147,6 @@ void ToolMain::onActionLoad()
 	sqlCommand = "SELECT * from Chunks";				//sql command which will return all records from  chunks table. There is only one tho.
 														//Send Command and fill result object
 	rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResultsChunk, 0);
-
 
 	sqlite3_step(pResultsChunk);
 	m_chunk.ID = sqlite3_column_int(pResultsChunk, 0);
@@ -171,7 +169,6 @@ void ToolMain::onActionLoad()
 	m_chunk.tex_splat_3_tiling = sqlite3_column_int(pResultsChunk, 17);
 	m_chunk.tex_splat_4_tiling = sqlite3_column_int(pResultsChunk, 18);
 
-
 	//Process REsults into renderable
 	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
 	//build the renderable chunk 
@@ -181,6 +178,9 @@ void ToolMain::onActionLoad()
 
 void ToolMain::onActionSave()
 {
+	//Get all the changes from the viewport into the scenegraph
+	m_d3dRenderer.CommitDisplayChanges(m_sceneGraph);
+
 	//SQL
 	int rc;
 	char *sqlCommand;
@@ -283,13 +283,18 @@ void ToolMain::Tick(MSG *msg)
 		//add to scenegraph
 		//resend scenegraph to Direct X renderer
 
+	//Object Selection
+	HandleInputSelectObject();
+
+	//Set camera focus if applicable
+	HandleInputCameraFocus();
+
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 }
 
 void ToolMain::UpdateInput(MSG* msg)
 {
-
 	switch (msg->message)
 	{
 		//Global inputs,  mouse position and keys etc
@@ -302,6 +307,8 @@ void ToolMain::UpdateInput(MSG* msg)
 			break;
 
 		case WM_MOUSEMOVE:
+			m_toolInputCommands.m_mousePos[0] = GET_X_LPARAM(msg->lParam);
+			m_toolInputCommands.m_mousePos[1] = GET_Y_LPARAM(msg->lParam);
 			break;
 
 		case WM_MOUSEWHEEL:
@@ -343,35 +350,71 @@ void ToolMain::UpdateInput(MSG* msg)
 	}
 
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
-#define RESOLVE_BOOL_COMMAND_FROM_ACTION(actionVal, actionEnum) \
-	{ \
-		auto mapping = m_inputMapping.GetMapping(Actions::##actionEnum); \
-		if (mapping.charId >= 0) \
-		{ \
-			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; \
-			if (inputActive) \
-				m_toolInputCommands.##actionVal = true; \
-			else \
-				m_toolInputCommands.##actionVal = false; \
-		} \
+	for(int i = 0; i < (int)Actions::MaxNum; i++)
+	{
+		const auto mapping = m_inputMapping.GetMapping((Actions)i); 
+		if (mapping.charId >= 0) 
+		{ 
+			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
+			if (inputActive) 
+				m_toolInputCommands.SetState((Actions)i);
+			else
+				m_toolInputCommands.SetState((Actions)i, false);
+		}
 	}
-
-	//WASD EQ movement
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(forward, Forward)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(back, Back)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(left, Left)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(right, Right)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(up, Up)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(down, Down)
-	//rotation
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotRight, RotRight)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(rotLeft, RotLeft)
-	//ArcCamera
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraModeToggle, ArcCameraModeToggle)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomIn, ArcCameraZoomIn)
-	RESOLVE_BOOL_COMMAND_FROM_ACTION(arcCameraZoomOut, ArcCameraZoomOut)
 
 	//Mouse scroll reset
 	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
 	m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+}
+
+void ToolMain::HandleInputCameraFocus()
+{
+	if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
+		return;
+
+	if (!m_d3dRenderer.GetCamera()->HasFocus()
+		&& !m_selectedObjects.empty())
+	{
+		
+		m_d3dRenderer.SetCameraFocus(m_selectedObjects[0]);
+		return;
+	}
+
+	m_d3dRenderer.SetCameraFocus();
+}
+
+void ToolMain::HandleInputSelectObject()
+{
+	if (m_toolInputCommands.GetState(Actions::SelectObject))
+	{
+		auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]);
+
+		// Store only Id as the DisplayList memory allocation addresses etc. get changed
+		// This makes the underlying object pointer unreliable
+		if (testResult.Id >= 0
+			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id) == m_selectedObjects.end())
+		{
+			m_selectedObjects.push_back(testResult.Id);
+			testResult.obj->MarkSelected();
+		}
+	}
+	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
+	{
+		auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]);
+
+		if (testResult.Id >= 0)
+		{
+			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id);
+			if (item != m_selectedObjects.end())
+			{
+				m_selectedObjects.erase(item);
+				testResult.obj->UnmarkSelected();
+			}
+		}
+	}
 }
