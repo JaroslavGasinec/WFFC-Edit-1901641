@@ -2,6 +2,7 @@
 #include "resource.h"
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 //
 //ToolMain Class
@@ -14,11 +15,7 @@ ToolMain::ToolMain()
 	m_databaseConnection = NULL;
 
 	//zero input commands
-	m_toolInputCommands.forward		= false;
-	m_toolInputCommands.back		= false;
-	m_toolInputCommands.left		= false;
-	m_toolInputCommands.right		= false;
-	
+	m_toolInputCommands.ResetState();	
 }
 
 
@@ -30,7 +27,6 @@ ToolMain::~ToolMain()
 
 int ToolMain::getCurrentSelectionID()
 {
-
 	return m_selectedObject;
 }
 
@@ -141,7 +137,6 @@ void ToolMain::onActionLoad()
 		newSceneObject.light_constant = sqlite3_column_double(pResults, 53);
 		newSceneObject.light_linear = sqlite3_column_double(pResults, 54);
 		newSceneObject.light_quadratic = sqlite3_column_double(pResults, 55);
-	
 
 		//send completed object to scenegraph
 		m_sceneGraph.push_back(newSceneObject);
@@ -152,7 +147,6 @@ void ToolMain::onActionLoad()
 	sqlCommand = "SELECT * from Chunks";				//sql command which will return all records from  chunks table. There is only one tho.
 														//Send Command and fill result object
 	rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResultsChunk, 0);
-
 
 	sqlite3_step(pResultsChunk);
 	m_chunk.ID = sqlite3_column_int(pResultsChunk, 0);
@@ -175,7 +169,6 @@ void ToolMain::onActionLoad()
 	m_chunk.tex_splat_3_tiling = sqlite3_column_int(pResultsChunk, 17);
 	m_chunk.tex_splat_4_tiling = sqlite3_column_int(pResultsChunk, 18);
 
-
 	//Process REsults into renderable
 	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
 	//build the renderable chunk 
@@ -185,6 +178,9 @@ void ToolMain::onActionLoad()
 
 void ToolMain::onActionSave()
 {
+	//Get all the changes from the viewport into the scenegraph
+	m_d3dRenderer.CommitDisplayChanges(m_sceneGraph);
+
 	//SQL
 	int rc;
 	char *sqlCommand;
@@ -287,67 +283,138 @@ void ToolMain::Tick(MSG *msg)
 		//add to scenegraph
 		//resend scenegraph to Direct X renderer
 
+	//Object Selection
+	HandleInputSelectObject();
+
+	//Set camera focus if applicable
+	HandleInputCameraFocus();
+
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 }
 
-void ToolMain::UpdateInput(MSG * msg)
+void ToolMain::UpdateInput(MSG* msg)
 {
-
 	switch (msg->message)
 	{
 		//Global inputs,  mouse position and keys etc
-	case WM_KEYDOWN:
-		m_keyArray[msg->wParam] = true;
-		break;
+		case WM_KEYDOWN:
+			m_keyArray[msg->wParam] = true;
+			break;
 
-	case WM_KEYUP:
-		m_keyArray[msg->wParam] = false;
-		break;
+		case WM_KEYUP:
+			m_keyArray[msg->wParam] = false;
+			break;
 
-	case WM_MOUSEMOVE:
-		break;
+		case WM_MOUSEMOVE:
+			m_toolInputCommands.m_mousePos[0] = GET_X_LPARAM(msg->lParam);
+			m_toolInputCommands.m_mousePos[1] = GET_Y_LPARAM(msg->lParam);
+			break;
 
-	case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
-		//set some flag for the mouse button in inputcommands
-		break;
+		case WM_MOUSEWHEEL:
+			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0) 
+				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
+			else if (GET_WHEEL_DELTA_WPARAM(msg->wParam) < 0)
+				m_mouseArray[(int)MouseInput::WheelRollDown] = true;
+			else
+			{
+				m_mouseArray[(int)MouseInput::WheelRollUp] = false;
+				m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+			}
 
+			break;
+
+		case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
+			m_mouseArray[(int)MouseInput::LButtonDown] = true;
+			break;
+
+		case WM_LBUTTONUP:
+			m_mouseArray[(int)MouseInput::LButtonDown] = false;
+			break;
+
+		case WM_RBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
+			m_mouseArray[(int)MouseInput::RButtonDown] = true;
+			break;
+
+		case WM_RBUTTONUP:
+			m_mouseArray[(int)MouseInput::RButtonDown] = false;
+			break;
+
+		case WM_MBUTTONDOWN:
+			m_mouseArray[(int)MouseInput::WheelButtonDown] = true;
+			break;
+
+		case WM_MBUTTONUP:
+			m_mouseArray[(int)MouseInput::WheelButtonDown] = false;
+			break;
 	}
+
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
-	//WASD movement
-	if (m_keyArray['W'])
+	for(int i = 0; i < (int)Actions::MaxNum; i++)
 	{
-		m_toolInputCommands.forward = true;
+		const auto mapping = m_inputMapping.GetMapping((Actions)i); 
+		if (mapping.charId >= 0) 
+		{ 
+			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
+			if (inputActive) 
+				m_toolInputCommands.SetState((Actions)i);
+			else
+				m_toolInputCommands.SetState((Actions)i, false);
+		}
 	}
-	else m_toolInputCommands.forward = false;
-	
-	if (m_keyArray['S'])
-	{
-		m_toolInputCommands.back = true;
-	}
-	else m_toolInputCommands.back = false;
-	if (m_keyArray['A'])
-	{
-		m_toolInputCommands.left = true;
-	}
-	else m_toolInputCommands.left = false;
 
-	if (m_keyArray['D'])
-	{
-		m_toolInputCommands.right = true;
-	}
-	else m_toolInputCommands.right = false;
-	//rotation
-	if (m_keyArray['E'])
-	{
-		m_toolInputCommands.rotRight = true;
-	}
-	else m_toolInputCommands.rotRight = false;
-	if (m_keyArray['Q'])
-	{
-		m_toolInputCommands.rotLeft = true;
-	}
-	else m_toolInputCommands.rotLeft = false;
+	//Mouse scroll reset
+	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
+	m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+}
 
-	//WASD
+void ToolMain::HandleInputCameraFocus()
+{
+	if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
+		return;
+
+	if (!m_d3dRenderer.GetCamera()->HasFocus()
+		&& !m_selectedObjects.empty())
+	{
+		
+		m_d3dRenderer.SetCameraFocus(m_selectedObjects[0]);
+		return;
+	}
+
+	m_d3dRenderer.SetCameraFocus();
+}
+
+void ToolMain::HandleInputSelectObject()
+{
+	if (m_toolInputCommands.GetState(Actions::SelectObject))
+	{
+		auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]);
+
+		// Store only Id as the DisplayList memory allocation addresses etc. get changed
+		// This makes the underlying object pointer unreliable
+		if (testResult.Id >= 0
+			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id) == m_selectedObjects.end())
+		{
+			m_selectedObjects.push_back(testResult.Id);
+			testResult.obj->MarkSelected();
+		}
+	}
+	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
+	{
+		auto testResult = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]);
+
+		if (testResult.Id >= 0)
+		{
+			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id);
+			if (item != m_selectedObjects.end())
+			{
+				m_selectedObjects.erase(item);
+				testResult.obj->UnmarkSelected();
+			}
+		}
+	}
 }

@@ -11,6 +11,7 @@
 #include "DisplayChunk.h"
 #include "ChunkObject.h"
 #include "InputCommands.h"
+#include "Camera.h"
 #include <vector>
 
 
@@ -49,7 +50,17 @@ public:
 	void BuildDisplayList(std::vector<SceneObject> * SceneGraph); //note vector passed by reference 
 	void BuildDisplayChunk(ChunkObject *SceneChunk);
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
+	void CommitDisplayChanges(std::vector<SceneObject>& sceneData);
 	void ClearDisplayList();
+	void SetCameraFocus(const int focusObject = -1);
+
+	struct RayTestResult
+	{
+		DisplayObject* obj = nullptr;
+		int Id = -1;
+	};
+	RayTestResult PerformRayTest(const float screenX, const float screenY);
+	std::shared_ptr<Camera> GetCamera();
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -58,29 +69,25 @@ public:
 private:
 
 	void Update(DX::StepTimer const& timer);
-
+	void RenderChunk();
+	void RenderUI();
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 
-	//tool specific
+	// Tool specific
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
 	InputCommands						m_InputCommands;
+	RECT                                m_ScreenDimensions;
+	// Camera
+	float  m_camMoveSpeed;
+	float  m_camZoomSpeed;
+	float  m_camRotRate;
+	Camera m_camera;
 
-	//functionality
-	float								m_movespeed;
-
-	//camera
-	DirectX::SimpleMath::Vector3		m_camPosition;
-	DirectX::SimpleMath::Vector3		m_camOrientation;
-	DirectX::SimpleMath::Vector3		m_camLookAt;
-	DirectX::SimpleMath::Vector3		m_camLookDirection;
-	DirectX::SimpleMath::Vector3		m_camRight;
-	float m_camRotRate;
-
-	//control variables
+	// Control variables
 	bool m_grid;							//grid rendering on / off
 	// Device resources.
     std::shared_ptr<DX::DeviceResources>    m_deviceResources;
@@ -125,8 +132,6 @@ private:
     DirectX::SimpleMath::Matrix                                             m_world;
     DirectX::SimpleMath::Matrix                                             m_view;
     DirectX::SimpleMath::Matrix                                             m_projection;
-
-
 };
 
 std::wstring StringToWCHART(std::string s);
