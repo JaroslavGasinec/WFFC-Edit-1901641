@@ -137,7 +137,6 @@ void ToolMain::onActionLoad()
 		newSceneObject.light_constant = sqlite3_column_double(pResults, 53);
 		newSceneObject.light_linear = sqlite3_column_double(pResults, 54);
 		newSceneObject.light_quadratic = sqlite3_column_double(pResults, 55);
-	
 
 		//send completed object to scenegraph
 		m_sceneGraph.push_back(newSceneObject);
@@ -148,7 +147,6 @@ void ToolMain::onActionLoad()
 	sqlCommand = "SELECT * from Chunks";				//sql command which will return all records from  chunks table. There is only one tho.
 														//Send Command and fill result object
 	rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand, -1, &pResultsChunk, 0);
-
 
 	sqlite3_step(pResultsChunk);
 	m_chunk.ID = sqlite3_column_int(pResultsChunk, 0);
@@ -171,7 +169,6 @@ void ToolMain::onActionLoad()
 	m_chunk.tex_splat_3_tiling = sqlite3_column_int(pResultsChunk, 17);
 	m_chunk.tex_splat_4_tiling = sqlite3_column_int(pResultsChunk, 18);
 
-
 	//Process REsults into renderable
 	m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
 	//build the renderable chunk 
@@ -181,6 +178,9 @@ void ToolMain::onActionLoad()
 
 void ToolMain::onActionSave()
 {
+	//Get all the changes from the viewport into the scenegraph
+	m_d3dRenderer.CommitDisplayChanges(m_sceneGraph);
+
 	//SQL
 	int rc;
 	char *sqlCommand;

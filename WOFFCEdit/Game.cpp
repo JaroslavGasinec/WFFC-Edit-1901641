@@ -359,7 +359,6 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 	int numObjects = SceneGraph->size();
 	for (int i = 0; i < numObjects; i++)
 	{
-		
 		//create a temp display object that we will populate then append to the display list.
 		DisplayObject newDisplayObject;
 		
@@ -387,6 +386,9 @@ void Game::BuildDisplayList(std::vector<SceneObject> * SceneGraph)
 				lights->SetTexture(newDisplayObject.m_texture_diffuse);			
 			}
 		});
+
+        //parse
+        newDisplayObject.m_ID = SceneGraph->at(i).ID;
 
 		//set position
 		newDisplayObject.m_position.x = SceneGraph->at(i).posX;
@@ -438,20 +440,76 @@ void Game::SaveDisplayChunk(ChunkObject* SceneChunk)
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
-void Game::SetCameraFocus(DisplayObject* focusObject)
+void Game::CommitDisplayChanges(std::vector<SceneObject>& sceneData)
 {
-    if (focusObject)
+    for (auto& ToCommit : m_displayList)
     {
-        m_camera.SetFocus(focusObject);
+        // was changed
+        if (!ToCommit.m_pendingCommit)
+            continue;
+
+        // clear the flag
+        ToCommit.m_pendingCommit = false;
+
+        // find corresponding scene object
+        auto Destination = std::find_if(sceneData.begin(), sceneData.end(), [&](SceneObject& x)->bool
+            {
+                return x.ID == ToCommit.m_ID;
+            });
+
+        // Check for validity of objects
+        if (Destination == sceneData.end())
+            continue;
+
+        Destination->posX = ToCommit.m_position.x;
+        Destination->posY = ToCommit.m_position.y;
+        Destination->posZ = ToCommit.m_position.z;
+        Destination->rotX = ToCommit.m_orientation.x;
+        Destination->rotY = ToCommit.m_orientation.y;
+        Destination->rotZ = ToCommit.m_orientation.z;
+        Destination->scaX = ToCommit.m_scale.x;
+        Destination->scaY = ToCommit.m_scale.y;
+        Destination->scaZ = ToCommit.m_scale.z;
+        Destination->editor_render = ToCommit.m_render;
+        Destination->editor_wireframe = ToCommit.m_wireframe;
+        Destination->light_type = ToCommit.m_light_type;
+        Destination->light_diffuse_r = ToCommit.m_light_diffuse_r;
+        Destination->light_diffuse_g = ToCommit.m_light_diffuse_g;
+        Destination->light_diffuse_b = ToCommit.m_light_diffuse_b;
+        Destination->light_specular_r = ToCommit.m_light_specular_r;
+        Destination->light_specular_g = ToCommit.m_light_specular_g;
+        Destination->light_specular_b = ToCommit.m_light_specular_b;
+        Destination->light_spot_cutoff = ToCommit.m_light_spot_cutoff;
+        Destination->light_constant = ToCommit.m_light_constant;
+        Destination->light_linear = ToCommit.m_light_linear;
+        Destination->light_quadratic = ToCommit.m_light_quadratic;
+    }
+}
+
+void Game::SetCameraFocus(const int focusObject)
+{
+    if (focusObject < 0)
+    {
+        m_camera.UnsetFocus();
+    }
+
+    const auto object = std::find_if(m_displayList.begin(), m_displayList.end(), [&](const DisplayObject& x)->bool
+        {
+            return x.m_ID == focusObject;
+        });
+
+    if (object != m_displayList.end())
+    {
+        m_camera.SetFocus(&(*object));
         return;
     }
 
 	m_camera.UnsetFocus();
 }
 
-DisplayObject* Game::PerformRayTest(const float screenX, const float screenY)
+int Game::PerformRayTest(const float screenX, const float screenY) const
 {
-    DisplayObject* intersected = nullptr;
+    int intersected = -1;
     float distanceFromStart = 0;
     float smallestDistance = 100;
 
@@ -490,7 +548,7 @@ DisplayObject* Game::PerformRayTest(const float screenX, const float screenY)
                 && distanceFromStart <= smallestDistance)
             { 
                 smallestDistance = distanceFromStart;
-                intersected = &it;
+                intersected = it.m_ID;
             }
         }
     }

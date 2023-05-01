@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+using DirectX::SimpleMath::Vector3;
 
 class DisplayObject
 {
@@ -11,11 +12,10 @@ public:
 	std::shared_ptr<DirectX::Model>						m_model;							//main Mesh
 	ID3D11ShaderResourceView *							m_texture_diffuse;					//diffuse texture
 
-
-	int m_ID;
-	DirectX::SimpleMath::Vector3			m_position;
-	DirectX::SimpleMath::Vector3			m_orientation;
-	DirectX::SimpleMath::Vector3			m_scale;
+	int             m_ID;
+	Vector3			m_position;
+	Vector3			m_orientation;
+	Vector3			m_scale;
 	bool									m_render;
 	bool									m_wireframe;
 
@@ -26,5 +26,8 @@ public:
 	float	m_light_constant;
 	float	m_light_linear;
 	float	m_light_quadratic;
+
+	// marking for commits
+	bool m_pendingCommit = false;
 };
 

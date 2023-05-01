@@ -50,6 +50,7 @@ public:
 	void BuildDisplayList(std::vector<SceneObject> * SceneGraph); //note vector passed by reference 
 	void BuildDisplayChunk(ChunkObject *SceneChunk);
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
+	void CommitDisplayChanges(std::vector<SceneObject>& sceneData);
 	void ClearDisplayList();
 	void SetCameraFocus(DisplayObject* focusObject = nullptr);
 	DisplayObject* PerformRayTest(const float screenX, const float screenY);
