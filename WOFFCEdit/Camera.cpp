@@ -7,12 +7,10 @@ Camera::Camera()
 	m_camForward = Vector3(1, 0, 0);
 	m_camRight = Vector3(0, 0, 1);
 	m_camUp = Vector3(0, 1, 0);
-	m_moveSpeed = 5;
+	m_camMoveSpeed = 5;
+	m_camZoomSpeed = 5;
 	m_camRotRate = 10;
-	m_focusObject = std::make_shared<SceneObject>();
-	m_focusObject->posX = 0;
-	m_focusObject->posY = 0;
-	m_focusObject->posZ = 0;
+	m_focusObject = nullptr;
 	m_arcZoom = 1;
 }
 
@@ -50,6 +48,11 @@ void Camera::UnsetFocus()
 	m_focusObject = nullptr;
 }
 
+bool Camera::HasFocus()
+{
+	return m_focusObject != nullptr;
+}
+
 void Camera::Update()
 {
 	//JERRY TODO: PENDING OBJECT SELECTION
@@ -60,6 +63,47 @@ void Camera::Update()
 		m_camPosition = focusObjectPos - (m_camForward * m_arcZoom);
 	//else
 		//CalculateOrientationVectors();
+}
+
+void Camera::HandleInput(const float deltaTime, const InputCommands& input)
+{
+	//if (!m_focusObject)
+	if (m_focusObject)
+	{
+		if (input.GetState(Actions::RotRight))
+			Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
+
+		if (input.GetState(Actions::RotLeft))
+			Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
+
+		// Handle non-arc mode movement
+		if (input.GetState(Actions::Forward))
+			Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
+
+		if (input.GetState(Actions::Back))
+			Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
+	}
+	else
+	{
+		if (input.GetState(Actions::ArcCameraZoomIn))
+			ArcZoomIn(m_camZoomSpeed * deltaTime);
+
+		if (input.GetState(Actions::ArcCameraZoomOut))
+			ArcZoomIn(-m_camZoomSpeed * deltaTime);
+	}
+
+	// Handle camera movement
+	if (input.GetState(Actions::Right))
+		Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
+
+	if (input.GetState(Actions::Left))
+		Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
+
+	if (input.GetState(Actions::Up))
+		Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
+
+	if (input.GetState(Actions::Down))
+		Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
 }
 
 Matrix Camera::GetLookAtMatrix()

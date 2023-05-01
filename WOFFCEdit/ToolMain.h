@@ -17,7 +17,7 @@ public: //methods
 
 	//onAction - These are the interface to MFC
 	int		getCurrentSelectionID();										//returns the selection number of currently selected object so that It can be displayed.
-	void	onActionInitialise(HWND handle, int width, int height);			//Passes through handle and hieght and width and initialises DirectX renderer and SQL LITE
+	void	onActionInitialise(HWND handle, int width, int height);			//Passes through handle and height and width and initializes DirectX renderer and SQL LITE
 	void	onActionFocusCamera();
 	void	onActionLoad();													//load the current chunk
 	afx_msg	void	onActionSave();											//save the current chunk
@@ -25,6 +25,7 @@ public: //methods
 
 	void	Tick(MSG *msg);
 	void	UpdateInput(MSG *msg);
+	void	HandleInputCameraFocus();
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk
@@ -33,8 +34,6 @@ public:	//variables
 
 private:	//methods
 	void	onContentAdded();
-
-
 		
 private:	//variables
 	HWND	m_toolHandle;		//Handle to the  window
@@ -44,6 +43,7 @@ private:	//variables
 	InputMapping m_inputMapping;
 	char	m_keyArray[256];
 	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
+	std::vector<std::shared_ptr<SceneObject>> m_selectedObjects;
 
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 

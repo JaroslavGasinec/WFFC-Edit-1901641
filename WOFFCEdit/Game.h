@@ -51,7 +51,9 @@ public:
 	void BuildDisplayChunk(ChunkObject *SceneChunk);
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
-	void UpdateArcMode();
+	void SetCameraFocus(std::shared_ptr<SceneObject> focusObject = nullptr);
+	std::shared_ptr<SceneObject> PerformRayTest(const float screenX, const float screenY);
+	std::shared_ptr<Camera> GetCamera();
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
@@ -77,10 +79,6 @@ private:
 	float  m_camZoomSpeed;
 	float  m_camRotRate;
 	Camera m_camera;
-	bool   m_arcMode;
-
-	// Utils memory
-	std::vector<std::shared_ptr<SceneObject>> m_selectedObjects;
 
 	// Control variables
 	bool m_grid;							//grid rendering on / off

@@ -47,7 +47,7 @@ struct InputCommands
 
 	bool actionBuffer[(int)Actions::MaxNum];
 
-	bool GetState(const Actions action)
+	bool GetState(const Actions action) const
 	{
 		return actionBuffer[(int)action];
 	}

@@ -1,6 +1,7 @@
 #pragma once
 #define PI 3.14
 #include "DisplayObject.h"
+#include "InputCommands.h"
 
 // namespaces
 using namespace DirectX;
@@ -175,7 +176,9 @@ public:
 	void ArcZoomReset();
 	void SetFocus(std::shared_ptr<SceneObject> focus);
 	void UnsetFocus();
+	bool HasFocus();
 	void Update();
+	void HandleInput(const float deltaTime, const InputCommands& input);
 
 	Matrix GetLookAtMatrix();
 	const Vector3& GetPosition();
@@ -188,7 +191,8 @@ public:
 	Vector3 m_camUp;
 	Rotator m_relativeRotation;
 	Rotator m_rotation;
-	float m_moveSpeed;
+	float m_camMoveSpeed;
+	float m_camZoomSpeed;
 	float m_camRotRate;
 	float m_arcZoom;
 

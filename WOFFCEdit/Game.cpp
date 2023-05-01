@@ -28,7 +28,6 @@ Game::Game()
 	m_camMoveSpeed = 1.00;
     m_camZoomSpeed = 5.00;
 	m_camRotRate = 20.0;
-    m_arcMode = false;
 }
 
 Game::~Game()
@@ -113,58 +112,18 @@ void Game::Tick(InputCommands *Input)
     Render();
 }
 
+std::shared_ptr<Camera> Game::GetCamera()
+{
+    return std::make_shared<Camera>(m_camera);
+}
+
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    float deltaTime = timer.GetFramesPerSecond() != 0 ? 1.0f / timer.GetFramesPerSecond() : 0;
-	UpdateArcMode();
-    m_camera.Update();
-
-    // Handle Camera focus
-    if (m_arcMode && m_selectedObjects.size() == 1)
-        m_camera.SetFocus(m_selectedObjects[0]);
-    else
-        m_camera.UnsetFocus();
-
-    // Handle camera rotation
-    //JERRY TODO: PENDING OBJECT SELECTION
-    //if (!m_arcMode)
-    if (m_arcMode)
-    {
-		if (m_InputCommands.GetState(Actions::RotRight))
-			m_camera.Rotate(Rotator(0,0,m_camRotRate * deltaTime));
-
-    	if (m_InputCommands.GetState(Actions::RotLeft))
-            m_camera.Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
-
-        // Handle non-arc mode movement
-    	if (m_InputCommands.GetState(Actions::Forward))
-            m_camera.Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
-
-    	if (m_InputCommands.GetState(Actions::Back))
-            m_camera.Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
-    }
-    else
-    {
-        if (m_InputCommands.GetState(Actions::ArcCameraZoomIn))
-			m_camera.ArcZoomIn(m_camZoomSpeed * deltaTime);
-
-        if (m_InputCommands.GetState(Actions::ArcCameraZoomOut))
-            m_camera.ArcZoomIn(-m_camZoomSpeed * deltaTime);
-    }
-
-	// Handle camera movement
-	if (m_InputCommands.GetState(Actions::Right))
-        m_camera.Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
-
-	if (m_InputCommands.GetState(Actions::Left))
-        m_camera.Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
-
-    if (m_InputCommands.GetState(Actions::Up))
-        m_camera.Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
-
-    if (m_InputCommands.GetState(Actions::Down))
-        m_camera.Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
+    const float RenderDeltaTime = timer.GetFramesPerSecond() != 0 ? 1.0f / timer.GetFramesPerSecond() : 0;
+    SetCameraFocus();
+	m_camera.Update();
+    m_camera.HandleInput(RenderDeltaTime, m_InputCommands);
 
 	//apply camera vectors
     m_view = m_camera.GetLookAtMatrix();
@@ -473,26 +432,20 @@ void Game::BuildDisplayChunk(ChunkObject * SceneChunk)
 	m_displayChunk.InitialiseBatch();
 }
 
-void Game::SaveDisplayChunk(ChunkObject * SceneChunk)
+void Game::SaveDisplayChunk(ChunkObject* SceneChunk)
 {
 	m_displayChunk.SaveHeightMap();			//save heightmap to file.
 }
 
-void Game::UpdateArcMode() 
+void Game::SetCameraFocus(std::shared_ptr<SceneObject> focusObject)
 {
-    // Toggle arc mode when requested
-    static bool ToggleBarrier = false;
-    if (m_InputCommands.GetState(Actions::ArcCameraModeToggle) 
-        && !m_selectedObjects.empty() 
-        && !ToggleBarrier)
+    if (focusObject)
     {
-        m_arcMode = !m_arcMode;
-        ToggleBarrier = true;
+        m_camera.SetFocus(focusObject);
+        return;
     }
-    else if (!m_InputCommands.GetState(Actions::ArcCameraModeToggle))
-    {
-        ToggleBarrier = false;
-    }
+
+	m_camera.UnsetFocus();
 }
 
 #ifdef DXTK_AUDIO

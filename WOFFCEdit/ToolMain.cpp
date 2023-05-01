@@ -26,7 +26,6 @@ ToolMain::~ToolMain()
 
 int ToolMain::getCurrentSelectionID()
 {
-
 	return m_selectedObject;
 }
 
@@ -357,4 +356,25 @@ void ToolMain::UpdateInput(MSG* msg)
 	//Mouse scroll reset
 	m_mouseArray[(int)MouseInput::WheelRollUp] = false;
 	m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+}
+
+void ToolMain::HandleInputCameraFocus()
+{
+	static bool ToggleBarrier = false;
+	if (m_toolInputCommands.GetState(Actions::ArcCameraModeToggle)
+		&& !m_selectedObjects.empty()
+		&& !ToggleBarrier)
+	{
+		m_d3dRenderer.SetCameraFocus(m_selectedObjects[0]);
+		ToggleBarrier = true;
+	}
+	else if (m_toolInputCommands.GetState(Actions::ArcCameraModeToggle)
+		&& !ToggleBarrier)
+	{
+		m_d3dRenderer.SetCameraFocus();
+	}
+	else if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
+	{
+		ToggleBarrier = false;
+	}
 }
