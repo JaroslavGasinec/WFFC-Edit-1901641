@@ -3,7 +3,10 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+// Gensys
 #include <Core.h>
+#include <CoreDataTypes.h>
+
 //
 //ToolMain Class
 ToolMain::ToolMain()
@@ -18,6 +21,14 @@ ToolMain::ToolMain()
 	m_toolInputCommands.ResetState();
 
 	Gensys::Initialise();
+	FullTerrainContext test;
+	test.ValueNoiseOctaves = 5;
+	test.NumberOfTerrainLayers = 4;
+	test.NumberOfFoliageLayers = 4;
+	test.User_RiverOutline = L"l";
+	test.User_TerrainFeatureMap = L"";
+	test.User_TerrainOutlineMap = L"";
+	Gensys::GenerateFullTerrain(&test, nullptr);
 }
 
 
