@@ -370,23 +370,18 @@ void ToolMain::UpdateInput(MSG* msg)
 
 void ToolMain::HandleInputCameraFocus()
 {
-	static bool ToggleBarrier = false;
-	if (m_toolInputCommands.GetState(Actions::ArcCameraModeToggle)
-		&& !m_selectedObjects.empty()
-		&& !ToggleBarrier)
+	if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
+		return;
+
+	if (!m_d3dRenderer.GetCamera()->HasFocus()
+		&& !m_selectedObjects.empty())
 	{
+		
 		m_d3dRenderer.SetCameraFocus(m_selectedObjects[0]);
-		ToggleBarrier = true;
+		return;
 	}
-	else if (m_toolInputCommands.GetState(Actions::ArcCameraModeToggle)
-		&& !ToggleBarrier)
-	{
-		m_d3dRenderer.SetCameraFocus();
-	}
-	else if (!m_toolInputCommands.GetState(Actions::ArcCameraModeToggle))
-	{
-		ToggleBarrier = false;
-	}
+
+	m_d3dRenderer.SetCameraFocus();
 }
 
 void ToolMain::HandleInputSelectObject()
