@@ -67,21 +67,21 @@ void Camera::Update()
 	}
 }
 
-void Camera::HandleInput(const float deltaTime, const InputCommands& input)
+void Camera::HandleInput(const float deltaTime, InputCommands& input)
 {
 	if (!m_focusObject)
 	{
-		if (input.GetState(Actions::RotRight))
-			Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
-
-		if (input.GetState(Actions::RotLeft))
+		if (input.GetState(Actions::RotRight, false))
 			Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
 
+		if (input.GetState(Actions::RotLeft, false))
+			Rotate(Rotator(0, 0, m_camRotRate * deltaTime));
+
 		// Handle non-arc mode movement
-		if (input.GetState(Actions::Forward))
+		if (input.GetState(Actions::Forward, false))
 			Move(Vector3(m_camMoveSpeed * deltaTime, 0, 0));
 
-		if (input.GetState(Actions::Back))
+		if (input.GetState(Actions::Back, false))
 			Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
 	}
 	else
@@ -94,16 +94,16 @@ void Camera::HandleInput(const float deltaTime, const InputCommands& input)
 	}
 
 	// Handle camera movement
-	if (input.GetState(Actions::Right))
+	if (input.GetState(Actions::Right, false))
 		Move(Vector3(0, 0, m_camMoveSpeed * deltaTime));
 
-	if (input.GetState(Actions::Left))
+	if (input.GetState(Actions::Left, false))
 		Move(Vector3(0, 0, -m_camMoveSpeed * deltaTime));
 
-	if (input.GetState(Actions::Up))
+	if (input.GetState(Actions::Up, false))
 		Move(Vector3(0, m_camMoveSpeed * deltaTime, 0));
 
-	if (input.GetState(Actions::Down))
+	if (input.GetState(Actions::Down, false))
 		Move(Vector3(0, -m_camMoveSpeed * deltaTime, 0));
 }
 

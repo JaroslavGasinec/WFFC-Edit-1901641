@@ -178,7 +178,7 @@ public:
 	void UnsetFocus();
 	bool HasFocus();
 	void Update();
-	void HandleInput(const float deltaTime, const InputCommands& input);
+	void HandleInput(const float deltaTime, InputCommands& input);
 
 	Matrix GetLookAtMatrix();
 	const Vector3& GetPosition();
