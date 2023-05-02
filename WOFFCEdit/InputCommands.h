@@ -59,6 +59,7 @@ struct InputCommands
 {
 	bool m_actionBuffer[(int)Actions::MaxNum];
 	long m_mousePos[2] = { 0,0 };
+	long m_mouseDelta[2] = { 0,0 };
 
 	bool GetState(const Actions action, const bool consume = true)
 	{

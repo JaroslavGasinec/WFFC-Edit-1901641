@@ -13,6 +13,7 @@ ToolMain::ToolMain()
 	m_selectedObject = 0;	//initial selection ID
 	m_sceneGraph.clear();	//clear the vector for the scenegraph
 	m_databaseConnection = NULL;
+	m_editorMode = EditorMode::Default;
 
 	//zero input commands
 	m_toolInputCommands.ResetState();	
@@ -286,11 +287,18 @@ void ToolMain::Tick(MSG *msg)
 	//Object Selection
 	HandleInputSelectObject();
 
+	//Editor Mode
+	HandleInputEditorMode();
+
 	//Set camera focus if applicable
 	HandleInputCameraFocus();
 
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
+
+	// End of tick, zero the mouse
+	m_toolInputCommands.m_mouseDelta[0] = 0;
+	m_toolInputCommands.m_mouseDelta[1] = 0;
 }
 
 void ToolMain::UpdateInput(MSG* msg)
@@ -307,10 +315,15 @@ void ToolMain::UpdateInput(MSG* msg)
 			break;
 
 		case WM_MOUSEMOVE:
-			m_toolInputCommands.m_mousePos[0] = GET_X_LPARAM(msg->lParam);
-			m_toolInputCommands.m_mousePos[1] = GET_Y_LPARAM(msg->lParam);
+		{
+			const int newMouseX = GET_X_LPARAM(msg->lParam);
+			const int newMouseY = GET_Y_LPARAM(msg->lParam);
+			m_toolInputCommands.m_mouseDelta[0] = newMouseX - m_toolInputCommands.m_mousePos[0];
+			m_toolInputCommands.m_mouseDelta[1] = newMouseY - m_toolInputCommands.m_mousePos[1];
+			m_toolInputCommands.m_mousePos[0] = newMouseX;
+			m_toolInputCommands.m_mousePos[1] = newMouseY;
 			break;
-
+		}
 		case WM_MOUSEWHEEL:
 			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0) 
 				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
@@ -422,4 +435,23 @@ void ToolMain::HandleInputSelectObject()
 void ToolMain::HandleInputModifyObject()
 {
 	// send request to renderer for list of object or even have renderer modify things
+}
+
+void ToolMain::HandleInputEditorMode()
+{
+	if (m_toolInputCommands.GetState(Actions::ToggleEditMode))
+	{
+		m_editorMode = m_editorMode == EditorMode::Default ? EditorMode::Edit : EditorMode::Default;
+		m_editModeData.Reset();
+	}
+
+	//-------LOCKING AXES--------
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisX))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::X);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisY))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Y);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Z);
 }
