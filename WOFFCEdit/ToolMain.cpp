@@ -279,33 +279,28 @@ void ToolMain::onActionSaveTerrain()
 
 void ToolMain::Tick(MSG *msg)
 {
-	//do we have a selection
-	//do we have a mode
-	//are we clicking / dragging /releasing
-	//has something changed
-		//update Scenegraph
-		//add to scenegraph
-		//resend scenegraph to Direct X renderer
+	//The actual update, called whenever no new Windows message is received
 
-	//Object Selection
+	//Object selection actions processing
 	HandleInputSelectObject();
 
-	//Editor Mode
+	//Editor Mode actions processing
 	HandleInputEditorMode();
 
-	//Set camera focus if applicable
+	//Camera Focus action processing
 	HandleInputCameraFocus();
 
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 
-	// End of tick, zero the mouse
+	// End of tick, zero the mouse deltas
 	m_toolInputCommands.m_mouseDelta[0] = 0;
 	m_toolInputCommands.m_mouseDelta[1] = 0;
 }
 
 void ToolMain::UpdateInput(MSG* msg)
 {
+	// The update called when new input windows message is received
 	switch (msg->message)
 	{
 		//Global inputs,  mouse position and keys etc
@@ -327,11 +322,18 @@ void ToolMain::UpdateInput(MSG* msg)
 			m_toolInputCommands.m_mousePos[1] = newMouseY;
 			break;
 		}
+
 		case WM_MOUSEWHEEL:
-			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0) 
+			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0)
+			{
 				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
+				m_mouseArray[(int)MouseInput::WheelRollDown] = false;
+			}
 			else if (GET_WHEEL_DELTA_WPARAM(msg->wParam) < 0)
+			{
 				m_mouseArray[(int)MouseInput::WheelRollDown] = true;
+				m_mouseArray[(int)MouseInput::WheelRollUp] = false;
+			}
 			else
 			{
 				m_mouseArray[(int)MouseInput::WheelRollUp] = false;
@@ -365,12 +367,14 @@ void ToolMain::UpdateInput(MSG* msg)
 			break;
 	}
 
-	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
+	// parse raw input into the action buffer based on mapping
 	for(int i = 0; i < (int)Actions::MaxNum; i++)
 	{
-		const auto mapping = m_inputMapping.GetMapping((Actions)i); 
+		const auto mapping = m_inputMapping.GetMapping((Actions)i);
+		// if mapping available
 		if (mapping.charId >= 0) 
-		{ 
+		{
+			// determine whether the action needs to be activated or not
 			bool inputActive = mapping.isMouse ? m_mouseArray[mapping.charId] : m_keyArray[mapping.charId]; 
 			if (inputActive) 
 				m_toolInputCommands.SetState((Actions)i);
