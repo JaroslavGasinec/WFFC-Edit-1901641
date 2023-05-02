@@ -13,6 +13,7 @@ ToolMain::ToolMain()
 	m_selectedObject = 0;	//initial selection ID
 	m_sceneGraph.clear();	//clear the vector for the scenegraph
 	m_databaseConnection = NULL;
+	m_editorMode = EditorMode::Default;
 
 	//zero input commands
 	m_toolInputCommands.ResetState();	
@@ -286,6 +287,9 @@ void ToolMain::Tick(MSG *msg)
 	//Object Selection
 	HandleInputSelectObject();
 
+	//Editor Mode
+	HandleInputEditorMode();
+
 	//Set camera focus if applicable
 	HandleInputCameraFocus();
 
@@ -422,4 +426,13 @@ void ToolMain::HandleInputSelectObject()
 void ToolMain::HandleInputModifyObject()
 {
 	// send request to renderer for list of object or even have renderer modify things
+}
+
+void ToolMain::HandleInputEditorMode()
+{
+	if (m_toolInputCommands.GetState(Actions::ToggleEditMode))
+	{
+		m_editorMode = m_editorMode == EditorMode::Default ? EditorMode::Edit : EditorMode::Default;
+		m_editModeData.Reset();
+	}
 }

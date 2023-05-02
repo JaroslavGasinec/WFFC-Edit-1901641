@@ -7,7 +7,7 @@
 #include "SceneObject.h"
 #include "InputCommands.h"
 #include <vector>
-
+#include "EditModeDataTypes.h"
 
 class ToolMain
 {
@@ -28,6 +28,7 @@ public: //methods
 	void	HandleInputCameraFocus();
 	void	HandleInputSelectObject();
 	void	HandleInputModifyObject();
+	void	HandleInputEditorMode();
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk
@@ -46,6 +47,8 @@ private:	//variables
 	char	m_keyArray[256];
 	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
 	std::vector<int> m_selectedObjects;
+	EditorMode m_editorMode;
+	EditorModeData m_editModeData;
 
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 
