@@ -454,4 +454,81 @@ void ToolMain::HandleInputEditorMode()
 
 	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
 		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Z);
+
+	// If editor mode is not on and there are no selected objects...
+	//... don't bother with the rest of input handling
+	if (m_editorMode == EditorMode::Default
+		|| m_selectedObjects.size() < 1)
+	{
+		return;
+	}
+
+	// Container for DisplayObjects, due to seemingly asynchronous nature this is valid only...
+	// during this call (hopefully)
+	std::vector<DisplayObject*> selectedObjects;
+
+	//--------SCALING OBJECT--------
+	if (m_toolInputCommands.GetState(Actions::ObjectSizeUp, false))
+	{
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+		{
+			it->Scale(Vector3(
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
+			));
+		}
+	}
+
+	if (m_toolInputCommands.GetState(Actions::ObjectSizeDown, false))
+	{
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+		{
+			it->Scale(Vector3(
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
+			));
+		}
+	}
+
+	//--------ROTATING OBJECT--------
+	if (m_toolInputCommands.GetState(Actions::ToggleObjectRotate))
+		m_editModeData.m_rotating = !m_editModeData.m_rotating;
+
+	if (m_editModeData.m_rotating)
+	{
+		const float mouseFactor = m_toolInputCommands.m_mouseDelta[0] * 0.01;
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+		{
+			it->Scale(Vector3(
+				m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
+				m_editModeData.m_scalingStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
+				m_editModeData.m_scalingStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
+			));
+		}
+	}
+
+	//--------MOVING OBJECT--------
+	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
+		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
+
+	if (m_editModeData.m_mouseMoving 
+		&& m_toolInputCommands.GetState(Actions::ObjectMoveToMouse, false))
+	{
+		auto result = m_d3dRenderer.PerformRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1]);
+
+		//TODO: Check for terrain and move the object to result.IntersectionPoint
+	}
 }
