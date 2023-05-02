@@ -295,6 +295,10 @@ void ToolMain::Tick(MSG *msg)
 
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
+
+	// End of tick, zero the mouse
+	m_toolInputCommands.m_mouseDelta[0] = 0;
+	m_toolInputCommands.m_mouseDelta[1] = 0;
 }
 
 void ToolMain::UpdateInput(MSG* msg)
@@ -311,10 +315,15 @@ void ToolMain::UpdateInput(MSG* msg)
 			break;
 
 		case WM_MOUSEMOVE:
-			m_toolInputCommands.m_mousePos[0] = GET_X_LPARAM(msg->lParam);
-			m_toolInputCommands.m_mousePos[1] = GET_Y_LPARAM(msg->lParam);
+		{
+			const int newMouseX = GET_X_LPARAM(msg->lParam);
+			const int newMouseY = GET_Y_LPARAM(msg->lParam);
+			m_toolInputCommands.m_mouseDelta[0] = newMouseX - m_toolInputCommands.m_mousePos[0];
+			m_toolInputCommands.m_mouseDelta[1] = newMouseY - m_toolInputCommands.m_mousePos[1];
+			m_toolInputCommands.m_mousePos[0] = newMouseX;
+			m_toolInputCommands.m_mousePos[1] = newMouseY;
 			break;
-
+		}
 		case WM_MOUSEWHEEL:
 			if (GET_WHEEL_DELTA_WPARAM(msg->wParam) > 0) 
 				m_mouseArray[(int)MouseInput::WheelRollUp] = true;
