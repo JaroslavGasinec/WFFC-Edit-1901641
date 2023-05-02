@@ -435,4 +435,14 @@ void ToolMain::HandleInputEditorMode()
 		m_editorMode = m_editorMode == EditorMode::Default ? EditorMode::Edit : EditorMode::Default;
 		m_editModeData.Reset();
 	}
+
+	//-------LOCKING AXES--------
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisX))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::X);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisY))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Y);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
+		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Z);
 }
