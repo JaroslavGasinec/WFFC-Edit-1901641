@@ -56,8 +56,9 @@ public:
 
 	struct RayTestResult
 	{
-		DisplayObject* obj = nullptr;
+		DisplayObject* IntersectedObject = nullptr;
 		int Id = -1;
+		Vector3 IntersectionPoint = Vector3(0, 0, 0);
 	};
 	RayTestResult PerformRayTest(const float screenX, const float screenY);
 	std::shared_ptr<Camera> GetCamera();

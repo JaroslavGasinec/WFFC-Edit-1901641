@@ -549,7 +549,8 @@ Game::RayTestResult Game::PerformRayTest(const float screenX, const float screen
             { 
                 smallestDistance = distanceFromStart;
                 intersected.Id = it.m_ID;
-                intersected.obj = &it;
+                intersected.IntersectedObject = &it;
+                intersected.IntersectionPoint = nearPoint + (unprojectedRay * distanceFromStart);
             }
         }
     }

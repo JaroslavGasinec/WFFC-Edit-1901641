@@ -411,7 +411,7 @@ void ToolMain::HandleInputSelectObject()
 			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id) == m_selectedObjects.end())
 		{
 			m_selectedObjects.push_back(testResult.Id);
-			testResult.obj->MarkSelected();
+			testResult.IntersectedObject->MarkSelected();
 		}
 	}
 	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
@@ -426,7 +426,7 @@ void ToolMain::HandleInputSelectObject()
 			if (item != m_selectedObjects.end())
 			{
 				m_selectedObjects.erase(item);
-				testResult.obj->UnmarkSelected();
+				testResult.IntersectedObject->UnmarkSelected();
 			}
 		}
 	}
