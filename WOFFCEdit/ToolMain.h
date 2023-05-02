@@ -16,7 +16,7 @@ public: //methods
 	~ToolMain();
 
 	//onAction - These are the interface to MFC
-	int		getCurrentSelectionID();										//returns the selection number of currently selected object so that It can be displayed.
+	int		getFirstIdFromCurrentSelection();										//returns the selection number of currently selected object so that It can be displayed.
 	void	onActionInitialise(HWND handle, int width, int height);			//Passes through handle and height and width and initializes DirectX renderer and SQL LITE
 	void	onActionFocusCamera();
 	void	onActionLoad();													//load the current chunk

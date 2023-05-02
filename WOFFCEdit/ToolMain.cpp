@@ -26,9 +26,12 @@ ToolMain::~ToolMain()
 }
 
 
-int ToolMain::getCurrentSelectionID()
+int ToolMain::getFirstIdFromCurrentSelection()
 {
-	return m_selectedObject;
+	if (m_selectedObjects.size() > 0)
+		return m_selectedObjects[0];
+	
+	return -1;
 }
 
 void ToolMain::onActionInitialise(HWND handle, int width, int height)
