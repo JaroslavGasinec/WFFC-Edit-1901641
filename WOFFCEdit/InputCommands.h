@@ -24,7 +24,8 @@ enum class Actions : int
 	ToggleEditingAxisX,
 	ToggleEditingAxisY,
 	ToggleEditingAxisZ,
-	ToggleMouseMove,
+	ToggleObjectMoveByMouse,
+	ObjectMoveToMouse,
 	ObjectSizeUp,
 	ObjectSizeDown,
 	ToggleObjectRotate,
@@ -97,9 +98,9 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,'1'),
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,'3'),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectRotate,'R'),
+		std::pair<MAP_PAIR>(Actions::ToggleObjectMoveByMouse,'M'),
 		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,'+'),
-		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,'-'),
-		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,'-'),
+		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,'-')
 	};
 #undef MAP_PAIR
 
@@ -108,7 +109,6 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp),
-		std::pair<MAP_PAIR>(Actions::ToggleMouseMove, MouseInput::WheelButtonDown),
 		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::LButtonDown),
 		std::pair<MAP_PAIR>(Actions::DeselectObject, MouseInput::RButtonDown),
 	};
