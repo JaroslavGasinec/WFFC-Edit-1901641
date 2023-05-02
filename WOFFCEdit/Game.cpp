@@ -507,6 +507,33 @@ void Game::SetCameraFocus(const int focusObject)
 	m_camera.UnsetFocus();
 }
 
+std::vector<DisplayObject*> Game::GetSelectedDisplayObjects(std::vector<int> selectedIDs)
+{
+    //This can be a fairly expensive function, especially with large number of selected objects
+    std::vector<DisplayObject*> out;
+    std::for_each(m_displayList.begin(), m_displayList.end(), [&](DisplayObject& x)
+        {
+            const auto result = std::find_if(selectedIDs.begin(), selectedIDs.end(), [&](int y)->bool
+                {
+                    if (x.m_ID != y)
+                        return false;
+
+            		out.push_back(&x);
+                    return true;
+                }
+            );
+
+			if (result != selectedIDs.end())
+			{
+                //delete the id we found from future comparisons
+                selectedIDs.erase(result);
+			}
+        }
+    );
+
+    return out;
+}
+
 Game::RayTestResult Game::PerformRayTest(const float screenX, const float screenY)
 {
     RayTestResult intersected;

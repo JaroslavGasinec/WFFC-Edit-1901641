@@ -53,6 +53,7 @@ public:
 	void CommitDisplayChanges(std::vector<SceneObject>& sceneData);
 	void ClearDisplayList();
 	void SetCameraFocus(const int focusObject = -1);
+	std::vector<DisplayObject*> GetSelectedDisplayObjects(std::vector<int> selectedIDs);
 
 	struct RayTestResult
 	{
