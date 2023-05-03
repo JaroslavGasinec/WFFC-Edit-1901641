@@ -15,7 +15,7 @@ struct EditorModeData
 		Num
 	};
 
-	float m_scalingStep = 0.1f;
+	float m_scalingStep = 0.01f;
 	float m_moveStep = 2.f;
 	float m_rotateStep = 1.f;
 	bool m_rotating = false;

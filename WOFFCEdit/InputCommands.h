@@ -93,14 +93,14 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::Up,'Q'),
 		std::pair<MAP_PAIR>(Actions::Down,'E'),
 		std::pair<MAP_PAIR>(Actions::RotRight,'Z'),
-		std::pair<MAP_PAIR>(Actions::ToggleEditMode,'`'),
-		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisX,'7'),
-		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,'1'),
-		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,'3'),
+		std::pair<MAP_PAIR>(Actions::ToggleEditMode,VK_TAB),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisX,VK_NUMPAD7),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,VK_NUMPAD1),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,VK_NUMPAD3),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectRotate,'R'),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectMoveByMouse,'M'),
-		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,'+'),
-		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,'-')
+		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,VK_ADD),
+		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,VK_SUBTRACT)
 	};
 #undef MAP_PAIR
 
