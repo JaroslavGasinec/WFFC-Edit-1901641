@@ -16,6 +16,9 @@ enum class Actions : int
 	ArcCameraModeToggle,
 	ArcCameraZoomIn,
 	ArcCameraZoomOut,
+	ArcCameraSnapToX,
+	ArcCameraSnapToY,
+	ArcCameraSnapToZ,
 	// Object Selection
 	SelectObject,
 	DeselectObject,
@@ -37,7 +40,7 @@ enum class Actions : int
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
 	ArcCameraActionsStart = ArcCameraModeToggle,
-	ArcCameraActionsEnd = ArcCameraZoomOut,
+	ArcCameraActionsEnd = ArcCameraSnapToZ,
 	ObjectSelectionStart = SelectObject,
 	ObjectSelectionEnd = DeselectObject,
 	ObjectAlterationStart = ToggleEditMode,
