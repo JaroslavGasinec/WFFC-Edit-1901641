@@ -290,8 +290,21 @@ void ToolMain::Tick(MSG *msg)
 	//Camera Focus action processing
 	HandleInputCameraFocus();
 
+	//Determine which (if multiple) edit mode data struct to give
+	EditModeData* data;
+	switch(m_editorMode)
+	{
+		case EditorMode::Edit:
+			data = &m_editModeData;
+			break;
+
+		default:
+			data = nullptr;
+			break;
+	}
+
 	//Renderer Update Call
-	m_d3dRenderer.Tick(&m_toolInputCommands);
+	m_d3dRenderer.Tick(&m_toolInputCommands, data);
 
 	// End of tick, zero the mouse deltas
 	m_toolInputCommands.m_mouseDelta[0] = 0;
@@ -439,11 +452,6 @@ void ToolMain::HandleInputSelectObject()
 	}
 }
 
-void ToolMain::HandleInputModifyObject()
-{
-	// send request to renderer for list of object or even have renderer modify things
-}
-
 void ToolMain::HandleInputEditorMode()
 {
 	if (m_toolInputCommands.GetState(Actions::ToggleEditMode))
@@ -454,13 +462,13 @@ void ToolMain::HandleInputEditorMode()
 
 	//-------LOCKING AXES--------
 	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisX))
-		m_editModeData.ToggleEditAxis(EditorModeData::Axis::X);
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::X);
 
 	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisY))
-		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Y);
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::Y);
 
 	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
-		m_editModeData.ToggleEditAxis(EditorModeData::Axis::Z);
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::Z);
 
 	// If editor mode is not on and there are no selected objects...
 	//... don't bother with the rest of input handling
@@ -483,9 +491,9 @@ void ToolMain::HandleInputEditorMode()
 		for (auto it : selectedObjects)
 		{
 			it->Scale(Vector3(
-				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
-				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
-				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+				m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
 			));
 		}
 	}
@@ -498,9 +506,9 @@ void ToolMain::HandleInputEditorMode()
 		for (auto it : selectedObjects)
 		{
 			it->Scale(Vector3(
-				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
-				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
-				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+				-m_editModeData.m_scalingStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
 			));
 		}
 	}
@@ -512,16 +520,19 @@ void ToolMain::HandleInputEditorMode()
 	if (m_editModeData.m_rotating)
 	{
 		const float mouseFactor = m_toolInputCommands.m_mouseDelta[0] * 0.01;
-		if (selectedObjects.size() < 1)
-			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
-
-		for (auto it : selectedObjects)
+		if (mouseFactor != 0)
 		{
-			it->Scale(Vector3(
-				m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::X),
-				m_editModeData.m_scalingStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Y),
-				m_editModeData.m_scalingStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditorModeData::Axis::Z)
-			));
+			if (selectedObjects.size() < 1)
+				selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+			for (auto it : selectedObjects)
+			{
+				it->Rotate(Vector3(
+					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
+				));
+			}
 		}
 	}
 

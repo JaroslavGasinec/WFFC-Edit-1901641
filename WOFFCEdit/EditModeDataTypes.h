@@ -5,7 +5,15 @@ enum class EditorMode : int
 	Edit
 };
 
-struct EditorModeData
+struct ModeData
+{
+	EditorMode GetType() const { return m_type; }
+
+protected:
+	EditorMode m_type = EditorMode::Default;
+};
+
+struct EditModeData : ModeData
 {
 	enum class Axis : int
 	{
@@ -15,13 +23,23 @@ struct EditorModeData
 		Num
 	};
 
-	float m_scalingStep = 0.01f;
-	float m_moveStep = 2.f;
-	float m_rotateStep = 1.f;
+	const float m_scalingStep;
+	const float m_moveStep;
+	const float m_rotateStep;
 	bool m_rotating = false;
 	bool m_mouseMoving = false;
-
 	bool transformAxis[(int)Axis::Num] = { true, true, true };
+
+	EditModeData() :
+	m_scalingStep(0.01f),
+	m_moveStep(2.f),
+	m_rotateStep(50.0f)
+	{
+		bool m_rotating = false;
+		bool m_mouseMoving = false;
+		bool transformAxis[(int)Axis::Num] = { true, true, true };
+		m_type = EditorMode::Edit;
+	}
 
 	void Reset()
 	{

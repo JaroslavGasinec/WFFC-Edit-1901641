@@ -27,7 +27,6 @@ public: //methods
 	void	UpdateInput(MSG *msg);
 	void	HandleInputCameraFocus();
 	void	HandleInputSelectObject();
-	void	HandleInputModifyObject();
 	void	HandleInputEditorMode();
 
 public:	//variables
@@ -48,7 +47,7 @@ private:	//variables
 	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
 	std::vector<int> m_selectedObjects;
 	EditorMode m_editorMode;
-	EditorModeData m_editModeData;
+	EditModeData m_editModeData;
 
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 
