@@ -96,6 +96,7 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::Up,'Q'),
 		std::pair<MAP_PAIR>(Actions::Down,'E'),
 		std::pair<MAP_PAIR>(Actions::RotRight,'Z'),
+		std::pair<MAP_PAIR>(Actions::RotLeft,'X'),
 		std::pair<MAP_PAIR>(Actions::ArcCameraSnapToX,'X'),
 		std::pair<MAP_PAIR>(Actions::ArcCameraSnapToY,'Y'),
 		std::pair<MAP_PAIR>(Actions::ArcCameraSnapToZ,'Z'),
