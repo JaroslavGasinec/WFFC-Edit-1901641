@@ -550,13 +550,34 @@ void ToolMain::HandleInputEditorMode()
 	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
 		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
 
-	if (m_editModeData.m_mouseMoving 
-		&& m_toolInputCommands.GetState(Actions::ObjectMoveToMouse, false))
+	if (m_editModeData.m_mouseMoving
+		&& m_editModeData.NumOfEditingAxes() == 2
+		)//&& m_toolInputCommands.GetState(Actions::ObjectMoveToMouse, false))
 	{
-		auto result = m_d3dRenderer.PerformRayTest(
-			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1]);
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
 
-		//TODO: Check for terrain and move the object to result.IntersectionPoint
+		Vector3 planeNormal;
+
+		if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::X)) 
+		{
+			if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y))
+				planeNormal = Vector3(0, 0, 1);
+			else
+				planeNormal = Vector3(0, 1, 0);
+		}
+		else if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y)
+			&& m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z))
+		{
+			planeNormal = Vector3(1, 0, 0);
+		}
+
+		auto result = m_d3dRenderer.PerformPlaneRayTest(
+			m_toolInputCommands.m_mousePos[0],
+			m_toolInputCommands.m_mousePos[1],
+			planeNormal,
+			selectedObjects[0]->m_position);
+
+		selectedObjects[0]->m_position = result.IntersectionPoint;
 	}
 }
