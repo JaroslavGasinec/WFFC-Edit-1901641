@@ -198,6 +198,30 @@ void Game::RenderChunk()
 
 void Game::RenderUI(const ModeData* data)
 {
+    if (data)
+    {
+        switch (data->GetType())
+        {
+	        case EditorMode::Edit:
+	        {
+	            auto castedData = static_cast<const EditModeData*>(data);
+	            RenderUIEditMode(castedData);
+	            break;
+	        }
+#
+	        default:
+	            RenderUIDefault();
+                break;
+        }
+    }
+    else
+    {
+        RenderUIDefault();
+    }
+}
+
+void Game::RenderUIDefault()
+{
     m_sprites->Begin();
     WCHAR   Buffer[256];
     std::wstring camPos = L"Cam X: " + std::to_wstring(m_camera.GetPosition().x) + L"Cam Z: " + std::to_wstring(m_camera.GetPosition().z);
@@ -205,10 +229,45 @@ void Game::RenderUI(const ModeData* data)
     std::wstring camRig = L"Right: X: " + std::to_wstring(m_camera.m_camRight.x) + L" Y: " + std::to_wstring(m_camera.m_camRight.y) + L" Z: " + std::to_wstring(m_camera.m_camRight.z);
     std::wstring camUp = L"Up: X: " + std::to_wstring(m_camera.m_camUp.x) + L" Y: " + std::to_wstring(m_camera.m_camUp.y) + L" Z: " + std::to_wstring(m_camera.m_camUp.z);
 
-    m_font->DrawString(m_sprites.get(), camPos.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
-    m_font->DrawString(m_sprites.get(), camFor.c_str(), XMFLOAT2(100, 30), Colors::Yellow);
-    m_font->DrawString(m_sprites.get(), camRig.c_str(), XMFLOAT2(100, 50), Colors::Yellow);
-    m_font->DrawString(m_sprites.get(), camUp.c_str(), XMFLOAT2(100, 70), Colors::Yellow);
+    m_font->DrawString(m_sprites.get(), camPos.c_str(), XMFLOAT2(10, 10), Colors::Yellow);
+    m_font->DrawString(m_sprites.get(), camFor.c_str(), XMFLOAT2(10, 30), Colors::Yellow);
+    m_font->DrawString(m_sprites.get(), camRig.c_str(), XMFLOAT2(10, 50), Colors::Yellow);
+    m_font->DrawString(m_sprites.get(), camUp.c_str(), XMFLOAT2(10, 70), Colors::Yellow);
+    m_sprites->End();
+}
+
+void Game::RenderUIEditMode(const EditModeData* data)
+{
+    m_sprites->Begin();
+    WCHAR   Buffer[256];
+
+    //Edit Mode text
+    m_font->DrawString(m_sprites.get(), L"EDIT MODE", XMFLOAT2(10, 10), Colors::Red);
+
+    //Active edit operations text
+    std::wstring editText;
+
+	if (data->m_mouseMoving)
+		editText += L" -Mouse Moving- ";
+
+    if (data->m_rotating)
+        editText += L" -Rotating Selected- ";
+
+	m_font->DrawString(m_sprites.get(), editText.c_str(), XMFLOAT2(20, 40), Colors::Yellow);
+    
+    //Editing axes
+    std::wstring axisText;
+    if (data->IsAxisUnlocked(EditModeData::Axis::X))
+        axisText += L" -X- ";
+
+    if (data->IsAxisUnlocked(EditModeData::Axis::Y))
+        axisText += L" -Y- ";
+
+    if (data->IsAxisUnlocked(EditModeData::Axis::Z))
+        axisText += L" -Z- ";
+
+    m_font->DrawString(m_sprites.get(), L"Editing axes", XMFLOAT2(10, 70), Colors::Yellow);
+    m_font->DrawString(m_sprites.get(), axisText.c_str(), XMFLOAT2(20, 100), Colors::Yellow);
     m_sprites->End();
 }
 

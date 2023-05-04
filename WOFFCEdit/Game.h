@@ -75,6 +75,9 @@ private:
 	void RenderChunk();
 	//UI render modes
 	void RenderUI(const ModeData* data);
+	void RenderUIDefault();
+	void RenderUIEditMode(const EditModeData* data);
+
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 
