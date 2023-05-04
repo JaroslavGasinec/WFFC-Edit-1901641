@@ -2,6 +2,7 @@
 #include "pch.h"
 
 using DirectX::SimpleMath::Vector3;
+using DirectX::IEffect;
 
 class DisplayObject
 {
@@ -20,7 +21,7 @@ public:
 	bool									m_wireframe;
 
 	int		m_light_type;
-	float	m_light_diffuse_r,	m_light_diffuse_g,	m_light_diffuse_b;
+	float	m_light_diffuse_r, m_light_diffuse_g, m_light_diffuse_b;
 	float	m_light_specular_r, m_light_specular_g, m_light_specular_b;
 	float	m_light_spot_cutoff;
 	float	m_light_constant;
@@ -31,12 +32,12 @@ public:
 	bool m_pendingCommit = false;
 
 	// possible changes
-	void Move(const Vector3 &worldOffset);
-	void Rotate(const Vector3 &offsetRotation);
-	void Scale(const Vector3 &offsetScale);
+	void Move(const Vector3& worldOffset);
+	void Rotate(const Vector3& offsetRotation);
+	void Scale(const Vector3& offsetScale);
 	void Reset();
 
-	void MarkSelected() {};
-	void UnmarkSelected() {};
+	void MarkSelected();
+	void UnmarkSelected();
 };
 

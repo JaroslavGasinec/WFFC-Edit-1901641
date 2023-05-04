@@ -54,3 +54,28 @@ void DisplayObject::Reset()
 	m_scale = Vector3(1, 1, 1);
 	m_orientation = Vector3(0, 0, 0);
 }
+
+void DisplayObject::MarkSelected()
+{
+	m_model->UpdateEffects([&](IEffect* highlightEffect)
+		{
+			auto* fogEffect = dynamic_cast<DirectX::IEffectFog*>(highlightEffect);
+		
+			if (fogEffect)
+			{
+				fogEffect->SetFogEnabled(true);
+				fogEffect->SetFogColor(DirectX::Colors::YellowGreen);
+			}
+		});
+}
+
+void DisplayObject::UnmarkSelected()
+{
+	m_model->UpdateEffects([&](IEffect* highlightEffect)
+		{
+			auto* fogEffect = dynamic_cast<DirectX::IEffectFog*>(highlightEffect);
+
+			if (fogEffect)
+				fogEffect->SetFogEnabled(false);
+		});
+}
