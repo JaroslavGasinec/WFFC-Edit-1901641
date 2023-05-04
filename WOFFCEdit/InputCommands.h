@@ -29,7 +29,6 @@ enum class Actions : int
 	ToggleEditingAxisY,
 	ToggleEditingAxisZ,
 	ToggleObjectMoveByMouse,
-	ObjectMoveToMouse,
 	ObjectSizeUp,
 	ObjectSizeDown,
 	ToggleObjectRotate,

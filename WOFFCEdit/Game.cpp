@@ -646,29 +646,15 @@ Game::RayTestResult Game::PerformObjectRayTest(const float screenX, const float 
 Game::RayTestResult Game::PerformPlaneRayTest(const float screenX, const float screenY, const Vector3& planeNormal, const Vector3& pointOnPlane)
 {
     RayTestResult intersected;
-    float distanceFromStart = 0;
-    float smallestDistance = 100;
 
     //setup near and far planes of frustum with mouse X and mouse y passed down from Toolmain.
     //they may look the same but note, the difference in Z
     const XMVECTOR nearSource = XMVectorSet(screenX, screenY, 0.0f, 1.0f);
     const XMVECTOR farSource = XMVectorSet(screenX, screenY, 1.0f, 1.0f);
-    //Get the scale factor and translation of the object
-    const XMVECTORF32 scale = { 1,1,1 };
-    const XMVECTORF32 translate = { -m_camera.GetPosition().x, -m_camera.GetPosition().y, -m_camera.GetPosition().z };
-
-    //convert euler angles into a quaternion for the rotation of the object
-    XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(
-        -m_camera.m_rotation.YawRad(), 
-        -m_camera.m_rotation.PitchRad(),
-        -m_camera.m_rotation.RollRad());
-
-    //create set the matrix of the selected object in the world based on the translation, scale and rotation.
-    XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
-
-    //Unproject the points on the near and far plane, with respect to the matrix we just created.
-    XMVECTOR nearPoint = XMVector3Unproject(nearSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, local);
-    XMVECTOR farPoint = XMVector3Unproject(farSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, local);
+  
+    //Unproject the points on the near and far plane
+    XMVECTOR nearPoint = XMVector3Unproject(nearSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, m_world);
+    XMVECTOR farPoint = XMVector3Unproject(farSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, m_world);
 
     //Turn the transformed points into our picking vector.
     XMVECTOR unprojectedRay = farPoint - nearPoint;

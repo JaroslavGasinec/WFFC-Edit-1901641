@@ -600,5 +600,7 @@ void ToolMain::EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedO
 		planeNormal,
 		selectedObjects[0]->m_position);
 
-	selectedObjects[0]->m_position = result.IntersectionPoint;
+	auto deltaMove = result.IntersectionPoint - selectedObjects[0]->m_position;
+	for (int i = 0; i < selectedObjects.size(); i++)
+		selectedObjects[i]->Move(deltaMove);
 }
