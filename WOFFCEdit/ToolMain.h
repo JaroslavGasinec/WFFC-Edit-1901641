@@ -27,7 +27,14 @@ public: //methods
 	void	UpdateInput(MSG *msg);
 	void	HandleInputCameraFocus();
 	void	HandleInputSelectObject();
-	void	HandleInputEditorMode();
+	void	HandleInputEditMode();
+
+	//Editor mode handle inputs
+	void EditMode_HandleInputAxisLocking();
+	void EditMode_HandleInputScaling(std::vector<DisplayObject*> &selectedObjects);
+	void EditMode_HandleInputRotating(std::vector<DisplayObject*>& selectedObjects);
+	void EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects);
+
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk

@@ -285,7 +285,7 @@ void ToolMain::Tick(MSG *msg)
 	HandleInputSelectObject();
 
 	//Editor Mode actions processing
-	HandleInputEditorMode();
+	HandleInputEditMode();
 
 	//Camera Focus action processing
 	HandleInputCameraFocus();
@@ -452,7 +452,7 @@ void ToolMain::HandleInputSelectObject()
 	}
 }
 
-void ToolMain::HandleInputEditorMode()
+void ToolMain::HandleInputEditMode()
 {
 	if (m_toolInputCommands.GetState(Actions::ToggleEditMode))
 	{
@@ -461,14 +461,7 @@ void ToolMain::HandleInputEditorMode()
 	}
 
 	//-------LOCKING AXES--------
-	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisX))
-		m_editModeData.ToggleEditAxis(EditModeData::Axis::X);
-
-	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisY))
-		m_editModeData.ToggleEditAxis(EditModeData::Axis::Y);
-
-	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
-		m_editModeData.ToggleEditAxis(EditModeData::Axis::Z);
+	EditMode_HandleInputAxisLocking();
 
 	// If editor mode is not on and there are no selected objects...
 	//... don't bother with the rest of input handling
@@ -478,7 +471,7 @@ void ToolMain::HandleInputEditorMode()
 		return;
 	}
 
-	// Container for DisplayObjects, due to seemingly asynchronous nature this is valid only...
+	// Container for DisplayObjects, due to seemingly asynchronous nature, this is valid only...
 	// during this call (hopefully)
 	std::vector<DisplayObject*> selectedObjects;
 
@@ -493,6 +486,35 @@ void ToolMain::HandleInputEditorMode()
 	}
 
 	//--------SCALING OBJECT--------
+	EditMode_HandleInputScaling(selectedObjects);
+
+	//--------ROTATING OBJECT--------
+	if (m_toolInputCommands.GetState(Actions::ToggleObjectRotate))
+		m_editModeData.m_rotating = !m_editModeData.m_rotating;
+
+	EditMode_HandleInputRotating(selectedObjects);
+
+	//--------MOVING OBJECT--------
+	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
+		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
+
+	EditMode_HandleInputMoving(selectedObjects);
+}
+
+void ToolMain::EditMode_HandleInputAxisLocking()
+{
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisX))
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::X);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisY))
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::Y);
+
+	if (m_toolInputCommands.GetState(Actions::ToggleEditingAxisZ))
+		m_editModeData.ToggleEditAxis(EditModeData::Axis::Z);
+}
+
+void ToolMain::EditMode_HandleInputScaling(std::vector<DisplayObject*> &selectedObjects)
+{
 	if (m_toolInputCommands.GetState(Actions::ObjectSizeUp, false))
 	{
 		if (selectedObjects.size() < 1)
@@ -522,62 +544,61 @@ void ToolMain::HandleInputEditorMode()
 			));
 		}
 	}
+}
 
-	//--------ROTATING OBJECT--------
-	if (m_toolInputCommands.GetState(Actions::ToggleObjectRotate))
-		m_editModeData.m_rotating = !m_editModeData.m_rotating;
+void ToolMain::EditMode_HandleInputRotating(std::vector<DisplayObject*>& selectedObjects)
+{
+	if (!m_editModeData.m_rotating)
+		return;
 
-	if (m_editModeData.m_rotating)
-	{
-		const float mouseFactor = m_toolInputCommands.m_mouseDelta[0] * 0.01;
-		if (mouseFactor != 0)
-		{
-			if (selectedObjects.size() < 1)
-				selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
-
-			for (auto it : selectedObjects)
-			{
-				it->Rotate(Vector3(
-					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
-					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
-					m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
-				));
-			}
-		}
-	}
-
-	//--------MOVING OBJECT--------
-	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
-		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
-
-	if (m_editModeData.m_mouseMoving
-		&& m_editModeData.NumOfEditingAxes() == 2
-		)//&& m_toolInputCommands.GetState(Actions::ObjectMoveToMouse, false))
+	const float mouseFactor = m_toolInputCommands.m_mouseDelta[0] * 0.01;
+	if (mouseFactor != 0)
 	{
 		if (selectedObjects.size() < 1)
 			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
 
-		Vector3 planeNormal;
-
-		if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::X)) 
+		for (auto it : selectedObjects)
 		{
-			if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y))
-				planeNormal = Vector3(0, 0, 1);
-			else
-				planeNormal = Vector3(0, 1, 0);
+			it->Rotate(Vector3(
+				m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+				m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+				m_editModeData.m_rotateStep * mouseFactor * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
+			));
 		}
-		else if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y)
-			&& m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z))
-		{
-			planeNormal = Vector3(1, 0, 0);
-		}
-
-		auto result = m_d3dRenderer.PerformPlaneRayTest(
-			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1],
-			planeNormal,
-			selectedObjects[0]->m_position);
-
-		selectedObjects[0]->m_position = result.IntersectionPoint;
 	}
+}
+
+void ToolMain::EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects)
+{
+	if (m_editModeData.m_mouseMoving
+		&& m_editModeData.NumOfEditingAxes() == 2)
+	{
+		return;
+	}
+
+	if (selectedObjects.size() < 1)
+		selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+	Vector3 planeNormal;
+
+	if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::X))
+	{
+		if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y))
+			planeNormal = Vector3(0, 0, 1);
+		else
+			planeNormal = Vector3(0, 1, 0);
+	}
+	else if (m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y)
+		&& m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z))
+	{
+		planeNormal = Vector3(1, 0, 0);
+	}
+
+	auto result = m_d3dRenderer.PerformPlaneRayTest(
+		m_toolInputCommands.m_mousePos[0],
+		m_toolInputCommands.m_mousePos[1],
+		planeNormal,
+		selectedObjects[0]->m_position);
+
+	selectedObjects[0]->m_position = result.IntersectionPoint;
 }
