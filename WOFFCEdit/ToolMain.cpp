@@ -482,6 +482,16 @@ void ToolMain::HandleInputEditorMode()
 	// during this call (hopefully)
 	std::vector<DisplayObject*> selectedObjects;
 
+	//--------RESET ROTATIONS AND SCALE SELECTED--------
+	if (m_toolInputCommands.GetState(Actions::NormalizeBack))
+	{
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+			it->Reset();
+	}
+
 	//--------SCALING OBJECT--------
 	if (m_toolInputCommands.GetState(Actions::ObjectSizeUp, false))
 	{

@@ -48,3 +48,9 @@ void DisplayObject::Scale(const Vector3& offsetScale)
 	m_scale += offsetScale;
 	m_pendingCommit = true;
 }
+
+void DisplayObject::Reset()
+{
+	m_scale = Vector3(1, 1, 1);
+	m_orientation = Vector3(0, 0, 0);
+}
