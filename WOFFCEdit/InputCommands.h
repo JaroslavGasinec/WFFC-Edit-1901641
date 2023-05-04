@@ -19,6 +19,19 @@ enum class Actions : int
 	// Object Selection
 	SelectObject,
 	DeselectObject,
+	// Selected Object(s) Alteration
+	ToggleEditMode,
+	NormalizeBack,
+	ToggleEditingAxisX,
+	ToggleEditingAxisY,
+	ToggleEditingAxisZ,
+	ToggleObjectMoveByMouse,
+	ObjectMoveToMouse,
+	ObjectSizeUp,
+	ObjectSizeDown,
+	ToggleObjectRotate,
+	ObjectMovePlus,
+	ObjectMoveMinus,
 	// Flags
 	MaxNum,
 	OldActionsStart = Forward,
@@ -26,7 +39,9 @@ enum class Actions : int
 	ArcCameraActionsStart = ArcCameraModeToggle,
 	ArcCameraActionsEnd = ArcCameraZoomOut,
 	ObjectSelectionStart = SelectObject,
-	ObjectSelectionEnd = DeselectObject
+	ObjectSelectionEnd = DeselectObject,
+	ObjectAlterationStart = ToggleEditMode,
+	ObjectAlterationEnd = ObjectMoveMinus
 };
 
 enum class MouseInput : int
@@ -46,6 +61,7 @@ struct InputCommands
 {
 	bool m_actionBuffer[(int)Actions::MaxNum];
 	long m_mousePos[2] = { 0,0 };
+	long m_mouseDelta[2] = { 0,0 };
 
 	bool GetState(const Actions action, const bool consume = true)
 	{
@@ -78,7 +94,15 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::Up,'Q'),
 		std::pair<MAP_PAIR>(Actions::Down,'E'),
 		std::pair<MAP_PAIR>(Actions::RotRight,'Z'),
-		std::pair<MAP_PAIR>(Actions::RotLeft,'X')
+		std::pair<MAP_PAIR>(Actions::ToggleEditMode,VK_TAB),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisX,VK_NUMPAD7),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,VK_NUMPAD1),
+		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,VK_NUMPAD3),
+		std::pair<MAP_PAIR>(Actions::NormalizeBack,VK_BACK),
+		std::pair<MAP_PAIR>(Actions::ToggleObjectRotate,'R'),
+		std::pair<MAP_PAIR>(Actions::ToggleObjectMoveByMouse,'M'),
+		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,VK_ADD),
+		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,VK_SUBTRACT)
 	};
 #undef MAP_PAIR
 

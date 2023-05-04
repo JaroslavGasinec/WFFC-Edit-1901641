@@ -12,6 +12,7 @@
 #include "ChunkObject.h"
 #include "InputCommands.h"
 #include "Camera.h"
+#include "EditModeDataTypes.h"
 #include <vector>
 
 
@@ -29,8 +30,8 @@ public:
 	void SetGridState(bool state);
 
 	// Basic game loop
-	void Tick(InputCommands * Input);
-	void Render();
+	void Tick(InputCommands* Input, const ModeData* data = nullptr);
+	void Render(const ModeData* data = nullptr);
 
 	// Rendering helpers
 	void Clear();
@@ -53,11 +54,13 @@ public:
 	void CommitDisplayChanges(std::vector<SceneObject>& sceneData);
 	void ClearDisplayList();
 	void SetCameraFocus(const int focusObject = -1);
+	std::vector<DisplayObject*> GetSelectedDisplayObjects(std::vector<int> selectedIDs);
 
 	struct RayTestResult
 	{
-		DisplayObject* obj = nullptr;
+		DisplayObject* IntersectedObject = nullptr;
 		int Id = -1;
+		Vector3 IntersectionPoint = Vector3(0, 0, 0);
 	};
 	RayTestResult PerformRayTest(const float screenX, const float screenY);
 	std::shared_ptr<Camera> GetCamera();
@@ -70,7 +73,11 @@ private:
 
 	void Update(DX::StepTimer const& timer);
 	void RenderChunk();
-	void RenderUI();
+	//UI render modes
+	void RenderUI(const ModeData* data);
+	void RenderUIDefault();
+	void RenderUIEditMode(const EditModeData* data);
+
 	void CreateDeviceDependentResources();
 	void CreateWindowSizeDependentResources();
 

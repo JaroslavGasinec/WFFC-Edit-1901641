@@ -7,7 +7,7 @@
 #include "SceneObject.h"
 #include "InputCommands.h"
 #include <vector>
-
+#include "EditModeDataTypes.h"
 
 class ToolMain
 {
@@ -16,7 +16,7 @@ public: //methods
 	~ToolMain();
 
 	//onAction - These are the interface to MFC
-	int		getCurrentSelectionID();										//returns the selection number of currently selected object so that It can be displayed.
+	int		getFirstIdFromCurrentSelection();										//returns the selection number of currently selected object so that It can be displayed.
 	void	onActionInitialise(HWND handle, int width, int height);			//Passes through handle and height and width and initializes DirectX renderer and SQL LITE
 	void	onActionFocusCamera();
 	void	onActionLoad();													//load the current chunk
@@ -27,6 +27,7 @@ public: //methods
 	void	UpdateInput(MSG *msg);
 	void	HandleInputCameraFocus();
 	void	HandleInputSelectObject();
+	void	HandleInputEditorMode();
 
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk
@@ -45,6 +46,8 @@ private:	//variables
 	char	m_keyArray[256];
 	bool    m_mouseArray[(int)MouseInput::MouseDigitalInputEnd + 1];
 	std::vector<int> m_selectedObjects;
+	EditorMode m_editorMode;
+	EditModeData m_editModeData;
 
 	sqlite3 *m_databaseConnection;	//sqldatabase handle
 

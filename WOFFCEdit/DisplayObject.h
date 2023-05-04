@@ -30,6 +30,12 @@ public:
 	// marking for commits
 	bool m_pendingCommit = false;
 
+	// possible changes
+	void Move(const Vector3 &worldOffset);
+	void Rotate(const Vector3 &offsetRotation);
+	void Scale(const Vector3 &offsetScale);
+	void Reset();
+
 	void MarkSelected() {};
 	void UnmarkSelected() {};
 };
