@@ -62,7 +62,8 @@ public:
 		int Id = -1;
 		Vector3 IntersectionPoint = Vector3(0, 0, 0);
 	};
-	RayTestResult PerformRayTest(const float screenX, const float screenY);
+	RayTestResult PerformObjectRayTest(const float screenX, const float screenY);
+	RayTestResult PerformPlaneRayTest(const float screenX, const float screenY, const Vector3 &planeNormal, const Vector3 &pointOnPlane = Vector3(0,0,0));
 	std::shared_ptr<Camera> GetCamera();
 
 #ifdef DXTK_AUDIO

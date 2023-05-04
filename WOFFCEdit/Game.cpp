@@ -592,7 +592,7 @@ std::vector<DisplayObject*> Game::GetSelectedDisplayObjects(std::vector<int> sel
     return out;
 }
 
-Game::RayTestResult Game::PerformRayTest(const float screenX, const float screenY)
+Game::RayTestResult Game::PerformObjectRayTest(const float screenX, const float screenY)
 {
     RayTestResult intersected;
     float distanceFromStart = 0;
@@ -639,6 +639,37 @@ Game::RayTestResult Game::PerformRayTest(const float screenX, const float screen
             }
         }
     }
+
+    return intersected;
+}
+
+Game::RayTestResult Game::PerformPlaneRayTest(const float screenX, const float screenY, const Vector3& planeNormal, const Vector3& pointOnPlane)
+{
+    RayTestResult intersected;
+
+    //setup near and far planes of frustum with mouse X and mouse y passed down from Toolmain.
+    //they may look the same but note, the difference in Z
+    const XMVECTOR nearSource = XMVectorSet(screenX, screenY, 0.0f, 1.0f);
+    const XMVECTOR farSource = XMVectorSet(screenX, screenY, 1.0f, 1.0f);
+  
+    //Unproject the points on the near and far plane
+    XMVECTOR nearPoint = XMVector3Unproject(nearSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, m_world);
+    XMVECTOR farPoint = XMVector3Unproject(farSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_view, m_world);
+
+    //Turn the transformed points into our picking vector.
+    XMVECTOR unprojectedRay = farPoint - nearPoint;
+    unprojectedRay = XMVector3Normalize(unprojectedRay);
+
+    //Plane equation variables
+    const float a = planeNormal.x;
+    const float b = planeNormal.y;
+    const float c = planeNormal.z;
+    const float d = (a * pointOnPlane.x + b * pointOnPlane.y + c * pointOnPlane.z) * -1;
+    
+    //Intersect in terms of direction from source distance
+    const float t = (-d - a * nearPoint.m128_f32[0] - b * nearPoint.m128_f32[1] - c * nearPoint.m128_f32[2]) / (a * unprojectedRay.m128_f32[0] + b * unprojectedRay.m128_f32[1] + c * unprojectedRay.m128_f32[2]);
+
+    intersected.IntersectionPoint = nearPoint + t * unprojectedRay;
 
     return intersected;
 }

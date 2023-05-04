@@ -59,4 +59,14 @@ struct EditModeData : ModeData
 	{
 		return transformAxis[(int)axis];
 	}
+
+	int NumOfEditingAxes() 
+	{
+		int out = 0;
+		for (int i = 0; i < 3; i++)
+			if (transformAxis[i])
+				out++;
+
+		return out;
+	}
 };
