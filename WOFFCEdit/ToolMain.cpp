@@ -421,7 +421,7 @@ void ToolMain::HandleInputSelectObject()
 {
 	if (m_toolInputCommands.GetState(Actions::SelectObject))
 	{
-		auto testResult = m_d3dRenderer.PerformRayTest(
+		auto testResult = m_d3dRenderer.PerformObjectRayTest(
 			m_toolInputCommands.m_mousePos[0],
 			m_toolInputCommands.m_mousePos[1]);
 
@@ -436,7 +436,7 @@ void ToolMain::HandleInputSelectObject()
 	}
 	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
 	{
-		auto testResult = m_d3dRenderer.PerformRayTest(
+		auto testResult = m_d3dRenderer.PerformObjectRayTest(
 			m_toolInputCommands.m_mousePos[0],
 			m_toolInputCommands.m_mousePos[1]);
 
