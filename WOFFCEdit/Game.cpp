@@ -258,13 +258,13 @@ void Game::RenderUIEditMode(const EditModeData* data)
     //Editing axes
     std::wstring axisText;
     if (data->IsAxisUnlocked(EditModeData::Axis::X))
-        axisText += L" -X- ";
+        axisText += L" -X (World Forward)- ";
 
     if (data->IsAxisUnlocked(EditModeData::Axis::Y))
-        axisText += L" -Y- ";
+        axisText += L" -Y (World Up)- ";
 
     if (data->IsAxisUnlocked(EditModeData::Axis::Z))
-        axisText += L" -Z- ";
+        axisText += L" -Z (World Right)- ";
 
     m_font->DrawString(m_sprites.get(), L"Editing axes", XMFLOAT2(10, 70), Colors::Yellow);
     m_font->DrawString(m_sprites.get(), axisText.c_str(), XMFLOAT2(20, 100), Colors::Yellow);
