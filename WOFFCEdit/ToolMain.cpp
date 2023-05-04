@@ -570,8 +570,8 @@ void ToolMain::EditMode_HandleInputRotating(std::vector<DisplayObject*>& selecte
 
 void ToolMain::EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects)
 {
-	if (m_editModeData.m_mouseMoving
-		&& m_editModeData.NumOfEditingAxes() == 2)
+	if (!m_editModeData.m_mouseMoving
+		|| m_editModeData.NumOfEditingAxes() != 2)
 	{
 		return;
 	}
