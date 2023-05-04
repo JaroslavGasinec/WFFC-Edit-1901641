@@ -419,36 +419,37 @@ void ToolMain::HandleInputCameraFocus()
 
 void ToolMain::HandleInputSelectObject()
 {
-	if (m_toolInputCommands.GetState(Actions::SelectObject))
-	{
-		auto testResult = m_d3dRenderer.PerformObjectRayTest(
-			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1]);
+	if (!m_toolInputCommands.GetState(Actions::SelectObject))
+		return; 
 
-		// Store only Id as the DisplayList memory allocation addresses etc. get changed
-		// This makes the underlying object pointer unreliable
-		if (testResult.Id >= 0
-			&& std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id) == m_selectedObjects.end())
+	auto testResult = m_d3dRenderer.PerformObjectRayTest(
+		m_toolInputCommands.m_mousePos[0],
+		m_toolInputCommands.m_mousePos[1]);
+
+	// Store only Id as the DisplayList memory allocation addresses etc. get changed
+	// This makes the underlying object pointer unreliable
+	if (testResult.Id < 0)
+		return;
+
+	auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id);
+	if (item == m_selectedObjects.end())
+	{
+		if (!m_toolInputCommands.GetState(Actions::MultiSelect, false))
 		{
-			m_selectedObjects.push_back(testResult.Id);
-			testResult.IntersectedObject->MarkSelected();
+			auto selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+			for (auto it : selectedObjects)
+				it->UnmarkSelected();
+
+			m_selectedObjects.clear();
 		}
+
+		m_selectedObjects.push_back(testResult.Id);
+		testResult.IntersectedObject->MarkSelected();
 	}
-	else if (m_toolInputCommands.GetState(Actions::DeselectObject))
+	else
 	{
-		auto testResult = m_d3dRenderer.PerformObjectRayTest(
-			m_toolInputCommands.m_mousePos[0],
-			m_toolInputCommands.m_mousePos[1]);
-
-		if (testResult.Id >= 0)
-		{
-			auto item = std::find(m_selectedObjects.begin(), m_selectedObjects.end(), testResult.Id);
-			if (item != m_selectedObjects.end())
-			{
-				m_selectedObjects.erase(item);
-				testResult.IntersectedObject->UnmarkSelected();
-			}
-		}
+		m_selectedObjects.erase(item);
+		testResult.IntersectedObject->UnmarkSelected();
 	}
 }
 
