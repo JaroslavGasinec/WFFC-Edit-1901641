@@ -31,6 +31,9 @@ public:
 	// marking for commits
 	bool m_pendingCommit = false;
 
+	//selection marking (optimized instead of constantly looking up the selection array)
+	bool m_isSelected = false;
+
 	// possible changes
 	void Move(const Vector3& worldOffset);
 	void Rotate(const Vector3& offsetRotation);
@@ -39,5 +42,6 @@ public:
 
 	void MarkSelected();
 	void UnmarkSelected();
+	bool IsSelected();
 };
 
