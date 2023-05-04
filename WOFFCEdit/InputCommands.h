@@ -21,6 +21,7 @@ enum class Actions : int
 	DeselectObject,
 	// Selected Object(s) Alteration
 	ToggleEditMode,
+	NormalizeBack,
 	ToggleEditingAxisX,
 	ToggleEditingAxisY,
 	ToggleEditingAxisZ,
@@ -97,6 +98,7 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisX,VK_NUMPAD7),
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,VK_NUMPAD1),
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,VK_NUMPAD3),
+		std::pair<MAP_PAIR>(Actions::NormalizeBack,VK_BACK),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectRotate,'R'),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectMoveByMouse,'M'),
 		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,VK_ADD),
