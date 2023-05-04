@@ -104,6 +104,8 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisX,VK_NUMPAD1),
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisY,VK_NUMPAD2),
 		std::pair<MAP_PAIR>(Actions::ToggleEditingAxisZ,VK_NUMPAD3),
+		std::pair<MAP_PAIR>(Actions::ObjectMovePlus,VK_UP),
+		std::pair<MAP_PAIR>(Actions::ObjectMoveMinus,VK_DOWN),
 		std::pair<MAP_PAIR>(Actions::NormalizeBack,VK_BACK),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectRotate,'R'),
 		std::pair<MAP_PAIR>(Actions::ToggleObjectMoveByMouse,'M'),
