@@ -59,6 +59,26 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+    D3D11_SUBRESOURCE_DATA initData = { 0, sizeof(uint32_t), 0 };
+    D3D11_TEXTURE2D_DESC desc;
+    memset(&desc, 0, sizeof(desc));
+    desc.Width = 20;
+    desc.Height = 20;
+    desc.MipLevels = desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_IMMUTABLE;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    auto hr = m_deviceResources->GetD3DDevice()->CreateTexture2D(&desc, &initData, &m_generatedBlackTex);
+    DX::ThrowIfFailed(hr);
+    
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+    memset(&SRVDesc, 0, sizeof(SRVDesc));
+    SRVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRVDesc.Texture2D.MipLevels = 1;
+    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateShaderResourceView(m_generatedBlackTex.Get(), &SRVDesc, &m_textureBlack));
+    
     GetClientRect(window, &m_ScreenDimensions);
 
 #ifdef DXTK_AUDIO
@@ -240,6 +260,9 @@ void Game::RenderUIEditMode(const EditModeData* data)
 {
     m_sprites->Begin();
     WCHAR   Buffer[256];
+
+    const RECT destination = {0,0,0,0};
+    m_sprites->Draw(m_textureBlack.Get(), destination);
 
     //Edit Mode text
     m_font->DrawString(m_sprites.get(), L"EDIT MODE", XMFLOAT2(10, 10), Colors::Red);

@@ -125,9 +125,12 @@ private:
     std::unique_ptr<DirectX::SoundEffectInstance>                           m_effect2;
 #endif
 
+	Microsoft::WRL::ComPtr<ID3D11Texture2D>                                 m_generatedBlackTex;
+
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_texture1;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_texture2;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>                               m_batchInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>                        m_textureBlack;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>                               m_batchInputLayout;
 
 #ifdef DXTK_AUDIO
     uint32_t                                                                m_audioEvent;
