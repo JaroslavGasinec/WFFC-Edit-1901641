@@ -12,6 +12,8 @@ enum class Actions : int
 	Down,
 	RotRight,
 	RotLeft,
+	// Camera movement
+	RotateCameraRelative,
 	// Arc Camera
 	ArcCameraModeToggle,
 	ArcCameraZoomIn,
@@ -38,6 +40,8 @@ enum class Actions : int
 	MaxNum,
 	OldActionsStart = Forward,
 	OldActionsEnd = RotLeft,
+	CameraRelativeMovementStart = RotateCameraRelative,
+	CameraRelativeMovementEnd = RotateCameraRelative,
 	ArcCameraActionsStart = ArcCameraModeToggle,
 	ArcCameraActionsEnd = ArcCameraSnapToZ,
 	ObjectSelectionStart = SelectObject,
@@ -120,7 +124,8 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomOut, MouseInput::WheelRollUp),
-		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::RButtonDown)
+		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::RButtonDown),
+		std::pair<MAP_PAIR>(Actions::RotateCameraRelative, MouseInput::LButtonDown)
 	};
 #undef MAP_PAIR
 

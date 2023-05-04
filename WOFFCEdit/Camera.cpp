@@ -12,6 +12,7 @@ Camera::Camera()
 	m_camRotRate = 10;
 	m_focusObject = nullptr;
 	m_arcZoom = 1;
+	m_sensitivity = 0.5;
 }
 
 void Camera::Rotate(const Rotator& offsetRotation, const bool relative)
@@ -71,6 +72,7 @@ void Camera::HandleInput(const float deltaTime, InputCommands& input)
 {
 	if (!m_focusObject)
 	{
+		// Key-based rotation
 		if (input.GetState(Actions::RotRight, false))
 			Rotate(Rotator(0, 0, -m_camRotRate * deltaTime));
 
@@ -83,6 +85,13 @@ void Camera::HandleInput(const float deltaTime, InputCommands& input)
 
 		if (input.GetState(Actions::Back, false))
 			Move(Vector3(-m_camMoveSpeed * deltaTime, 0, 0));
+
+		if (input.GetState(Actions::RotateCameraRelative, false))
+			Rotate(Rotator(
+				0,
+				input.m_mouseDelta[1] * m_sensitivity,
+				input.m_mouseDelta[0] * m_sensitivity
+				));
 	}
 	else
 	{

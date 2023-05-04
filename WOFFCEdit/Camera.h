@@ -41,6 +41,7 @@ public:
 	float m_camZoomSpeed;
 	float m_camRotRate;
 	float m_arcZoom;
+	float m_sensitivity;
 
 	DisplayObject* m_focusObject;
 
