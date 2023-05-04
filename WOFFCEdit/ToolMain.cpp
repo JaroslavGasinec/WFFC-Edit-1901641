@@ -495,6 +495,8 @@ void ToolMain::HandleInputEditMode()
 	EditMode_HandleInputRotating(selectedObjects);
 
 	//--------MOVING OBJECT--------
+	EditMode_HandleInputMoving(selectedObjects);
+
 	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
 		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
 
@@ -603,4 +605,37 @@ void ToolMain::EditMode_HandleInputMouseMoving(std::vector<DisplayObject*>& sele
 	auto deltaMove = result.IntersectionPoint - selectedObjects[0]->m_position;
 	for (int i = 0; i < selectedObjects.size(); i++)
 		selectedObjects[i]->Move(deltaMove);
+}
+
+void ToolMain::EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects)
+{
+	if (m_toolInputCommands.GetState(Actions::ObjectMovePlus)) 
+	{
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+		{
+			it->Move(Vector3(
+				m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+				m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+				m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
+			));
+		}
+	}
+
+	if (m_toolInputCommands.GetState(Actions::ObjectMoveMinus))
+	{
+		if (selectedObjects.size() < 1)
+			selectedObjects = m_d3dRenderer.GetSelectedDisplayObjects(m_selectedObjects);
+
+		for (auto it : selectedObjects)
+		{
+			it->Move(Vector3(
+				-m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::X),
+				-m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Y),
+				-m_editModeData.m_moveStep * (int)m_editModeData.IsAxisUnlocked(EditModeData::Axis::Z)
+			));
+		}
+	}
 }

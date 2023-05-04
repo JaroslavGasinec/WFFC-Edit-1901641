@@ -32,7 +32,7 @@ struct EditModeData : ModeData
 
 	EditModeData() :
 	m_scalingStep(0.01f),
-	m_moveStep(2.f),
+	m_moveStep(0.1f),
 	m_rotateStep(50.0f)
 	{
 		bool m_rotating = false;

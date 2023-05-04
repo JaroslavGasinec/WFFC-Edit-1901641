@@ -34,6 +34,7 @@ public: //methods
 	void EditMode_HandleInputScaling(std::vector<DisplayObject*> &selectedObjects);
 	void EditMode_HandleInputRotating(std::vector<DisplayObject*>& selectedObjects);
 	void EditMode_HandleInputMouseMoving(std::vector<DisplayObject*>& selectedObjects);
+	void EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects);
 
 
 public:	//variables
