@@ -117,6 +117,9 @@
     <ClInclude Include="EditModeDataTypes.h">
       <Filter>Tool</Filter>
     </ClInclude>
+    <ClInclude Include="Rotator.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

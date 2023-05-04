@@ -193,6 +193,7 @@
     <ClInclude Include="MFCRenderFrame.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Rotator.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SelectDialogue.h" />
     <ClInclude Include="sqlite3.h" />
