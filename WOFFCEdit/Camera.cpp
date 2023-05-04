@@ -91,6 +91,15 @@ void Camera::HandleInput(const float deltaTime, InputCommands& input)
 
 		if (input.GetState(Actions::ArcCameraZoomOut))
 			ArcZoomIn(-m_camZoomSpeed * deltaTime);
+
+		if (input.GetState(Actions::ArcCameraSnapToX))
+			m_camPosition = m_focusObject->m_position - Vector3(1, 0, 0) * m_arcZoom;
+
+		if (input.GetState(Actions::ArcCameraSnapToY))
+			m_camPosition = m_focusObject->m_position - Vector3(0, 1, 0) * m_arcZoom;
+
+		if (input.GetState(Actions::ArcCameraSnapToZ))
+			m_camPosition = m_focusObject->m_position - Vector3(0, 0, 1) * m_arcZoom;
 	}
 
 	// Handle camera movement
