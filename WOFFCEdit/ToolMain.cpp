@@ -290,8 +290,21 @@ void ToolMain::Tick(MSG *msg)
 	//Camera Focus action processing
 	HandleInputCameraFocus();
 
+	//Determine which (if multiple) edit mode data struct to give
+	EditModeData* data;
+	switch(m_editorMode)
+	{
+		case EditorMode::Edit:
+			data = &m_editModeData;
+			break;
+
+		default:
+			data = nullptr;
+			break;
+	}
+
 	//Renderer Update Call
-	m_d3dRenderer.Tick(&m_toolInputCommands);
+	m_d3dRenderer.Tick(&m_toolInputCommands, data);
 
 	// End of tick, zero the mouse deltas
 	m_toolInputCommands.m_mouseDelta[0] = 0;

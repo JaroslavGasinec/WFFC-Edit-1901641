@@ -92,7 +92,7 @@ void Game::SetGridState(bool state)
 
 #pragma region Frame Update
 // Executes the basic game loop.
-void Game::Tick(InputCommands *Input)
+void Game::Tick(InputCommands* Input, const ModeData* data)
 {
 	//copy over the input commands so we have a local version to use elsewhere.
 	m_InputCommands = *Input;
@@ -110,8 +110,7 @@ void Game::Tick(InputCommands *Input)
         m_retryDefault = true;
     }
 #endif
-
-    Render();
+    Render(data);
 }
 
 std::shared_ptr<Camera> Game::GetCamera()
@@ -197,7 +196,7 @@ void Game::RenderChunk()
     m_displayChunk.RenderBatch(m_deviceResources);
 }
 
-void Game::RenderUI()
+void Game::RenderUI(const ModeData* data)
 {
     m_sprites->Begin();
     WCHAR   Buffer[256];
@@ -214,7 +213,7 @@ void Game::RenderUI()
 }
 
 // Draws the scene.
-void Game::Render()
+void Game::Render(const ModeData* data)
 {
     // Don't try to render anything before the first Update.
 	if (m_timer.GetFrameCount() == 0)
@@ -233,11 +232,11 @@ void Game::Render()
 		DrawGrid(xaxis, yaxis, g_XMZero, 512, 512, Colors::Gray);
 	}
 
-	//RENDER OBJECTS FROM SCENEGRAPH
+    //RENDER OBJECTS FROM SCENEGRAPH
     RenderChunk();
 
-    //CAMERA POSITION ON HUD
-    RenderUI();
+    //RENDER CORRECT UI
+    RenderUI(data);
 
     m_deviceResources->Present();
 }
