@@ -498,7 +498,7 @@ void ToolMain::HandleInputEditMode()
 	if (m_toolInputCommands.GetState(Actions::ToggleObjectMoveByMouse))
 		m_editModeData.m_mouseMoving = !m_editModeData.m_mouseMoving;
 
-	EditMode_HandleInputMoving(selectedObjects);
+	EditMode_HandleInputMouseMoving(selectedObjects);
 }
 
 void ToolMain::EditMode_HandleInputAxisLocking()
@@ -568,7 +568,7 @@ void ToolMain::EditMode_HandleInputRotating(std::vector<DisplayObject*>& selecte
 	}
 }
 
-void ToolMain::EditMode_HandleInputMoving(std::vector<DisplayObject*>& selectedObjects)
+void ToolMain::EditMode_HandleInputMouseMoving(std::vector<DisplayObject*>& selectedObjects)
 {
 	if (!m_editModeData.m_mouseMoving
 		|| m_editModeData.NumOfEditingAxes() != 2)
