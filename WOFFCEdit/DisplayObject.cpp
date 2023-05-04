@@ -57,6 +57,7 @@ void DisplayObject::Reset()
 
 void DisplayObject::MarkSelected()
 {
+	m_isSelected = true;
 	m_model->UpdateEffects([&](IEffect* highlightEffect)
 		{
 			auto* fogEffect = dynamic_cast<DirectX::IEffectFog*>(highlightEffect);
@@ -71,6 +72,7 @@ void DisplayObject::MarkSelected()
 
 void DisplayObject::UnmarkSelected()
 {
+	m_isSelected = false;
 	m_model->UpdateEffects([&](IEffect* highlightEffect)
 		{
 			auto* fogEffect = dynamic_cast<DirectX::IEffectFog*>(highlightEffect);
@@ -78,4 +80,9 @@ void DisplayObject::UnmarkSelected()
 			if (fogEffect)
 				fogEffect->SetFogEnabled(false);
 		});
+}
+
+bool DisplayObject::IsSelected()
+{
+	return m_isSelected;
 }
