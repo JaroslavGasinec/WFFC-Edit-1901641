@@ -1,41 +1,15 @@
 #pragma once
 #include <map>
+#include "ActionList.h"
 
 enum class Actions : int
 {
-	// Old
-	Forward = 0,
-	Back,
-	Right,
-	Left,
-	Up,
-	Down,
-	RotRight,
-	RotLeft,
-	// Camera movement
-	RotateCameraRelative,
-	// Arc Camera
-	ArcCameraModeToggle,
-	ArcCameraZoomIn,
-	ArcCameraZoomOut,
-	ArcCameraSnapToX,
-	ArcCameraSnapToY,
-	ArcCameraSnapToZ,
-	// Object Selection
-	SelectObject,
-	MultiSelect,
-	// Selected Object(s) Alteration
-	ToggleEditMode,
-	NormalizeBack,
-	ToggleEditingAxisX,
-	ToggleEditingAxisY,
-	ToggleEditingAxisZ,
-	ToggleObjectMoveByMouse,
-	ObjectSizeUp,
-	ObjectSizeDown,
-	ToggleObjectRotate,
-	ObjectMovePlus,
-	ObjectMoveMinus,
+
+#define LISTING(Action) Action,
+	//Use macro to define all the actions
+	ACTIONS(LISTING)
+#undef LISTING
+
 	// Flags
 	MaxNum,
 	OldActionsStart = Forward,
@@ -91,7 +65,7 @@ struct InputCommands
 
 struct InputMapping 
 {
-#define MAP_PAIR Actions,char
+	#define MAP_PAIR Actions,char
 	std::map<MAP_PAIR> keyMapping = {
 		std::pair<MAP_PAIR>(Actions::Forward,'W'),
 		std::pair<MAP_PAIR>(Actions::Back,'S'),
@@ -117,9 +91,9 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::ObjectSizeUp,VK_ADD),
 		std::pair<MAP_PAIR>(Actions::ObjectSizeDown,VK_SUBTRACT)
 	};
-#undef MAP_PAIR
+	#undef MAP_PAIR
 
-#define MAP_PAIR Actions,MouseInput
+	#define MAP_PAIR Actions,MouseInput
 	std::map<MAP_PAIR> mouseMapping = {
 		std::pair<MAP_PAIR>(Actions::ArcCameraModeToggle, MouseInput::WheelButtonDown),
 		std::pair<MAP_PAIR>(Actions::ArcCameraZoomIn, MouseInput::WheelRollDown),
@@ -127,7 +101,7 @@ struct InputMapping
 		std::pair<MAP_PAIR>(Actions::SelectObject, MouseInput::RButtonDown),
 		std::pair<MAP_PAIR>(Actions::RotateCameraRelative, MouseInput::LButtonDown)
 	};
-#undef MAP_PAIR
+	#undef MAP_PAIR
 
 	struct MappingResult
 	{
