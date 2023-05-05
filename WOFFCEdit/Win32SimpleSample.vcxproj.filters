@@ -120,6 +120,12 @@
     <ClInclude Include="Rotator.h">
       <Filter>Tool</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="ActionList.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

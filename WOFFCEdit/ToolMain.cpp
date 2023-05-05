@@ -3,8 +3,12 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include "json.hpp"
+#include <fstream>
+#include "ActionList.h"
 
-//
+using json = nlohmann::json;
+
 //ToolMain Class
 ToolMain::ToolMain()
 {
@@ -16,7 +20,9 @@ ToolMain::ToolMain()
 	m_editorMode = EditorMode::Default;
 
 	//zero input commands
-	m_toolInputCommands.ResetState();	
+	m_toolInputCommands.ResetState();
+
+	LoadMappingsFromConfig();
 }
 
 
@@ -269,12 +275,48 @@ void ToolMain::onActionSave()
 		rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand2.c_str(), -1, &pResults, 0);
 		sqlite3_step(pResults);	
 	}
+
 	MessageBox(NULL, L"Objects Saved", L"Notification", MB_OK);
 }
 
 void ToolMain::onActionSaveTerrain()
 {
 	m_d3dRenderer.SaveDisplayChunk(&m_chunk);
+}
+
+void ToolMain::LoadMappingsFromConfig()
+{
+	// Load in the file as a stream of bytes
+	const auto mappingFileStream = new std::ifstream("mapping.json");
+	if (!mappingFileStream->is_open())
+		return;
+
+	// Parse (as a copy) the stream into JSON wrapper
+	json loadedMapping = json::parse(*mappingFileStream);
+
+	// close file and delete the stream buffer
+	mappingFileStream->close();
+	delete mappingFileStream;
+
+	#define LISTING(Action) \
+	if (loadedMapping.contains(#Action)) \
+	{ \
+		if (loadedMapping.at(#Action).type() == json::value_t::number_integer \
+		|| loadedMapping.at(#Action).type() == json::value_t::number_unsigned) \
+		{ \
+			m_inputMapping.keyMapping[Actions::Action] = (char)loadedMapping.at(#Action).get<int>(); \
+		} \
+		else if (loadedMapping.at(#Action).type() == json::value_t::string)\
+		{ \
+			std::string value = loadedMapping.at(#Action).get<std::string>(); \
+			if (value.size() == 1) \
+				m_inputMapping.keyMapping[Actions::Action] = value[0]; \
+		} \
+	}
+	
+	// Use the action list macro to generate the if conditions using strings
+	ACTIONS(LISTING)
+	#undef LISTING
 }
 
 void ToolMain::Tick(MSG *msg)

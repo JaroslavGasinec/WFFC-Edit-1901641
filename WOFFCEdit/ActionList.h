@@ -1,0 +1,30 @@
+#pragma once
+#define ACTIONS(XX) \
+	XX(Forward) \
+	XX(Back) \
+	XX(Right) \
+	XX(Left) \
+	XX(Up) \
+	XX(Down) \
+	XX(RotRight) \
+	XX(RotLeft) \
+	XX(RotateCameraRelative) \
+	XX(ArcCameraModeToggle) \
+	XX(ArcCameraZoomIn) \
+	XX(ArcCameraZoomOut) \
+	XX(ArcCameraSnapToX) \
+	XX(ArcCameraSnapToY) \
+	XX(ArcCameraSnapToZ) \
+	XX(SelectObject) \
+	XX(MultiSelect) \
+	XX(ToggleEditMode) \
+	XX(NormalizeBack) \
+	XX(ToggleEditingAxisX) \
+	XX(ToggleEditingAxisY) \
+	XX(ToggleEditingAxisZ) \
+	XX(ToggleObjectMoveByMouse) \
+	XX(ObjectSizeUp) \
+	XX(ObjectSizeDown) \
+	XX(ToggleObjectRotate) \
+	XX(ObjectMovePlus) \
+	XX(ObjectMoveMinus)
