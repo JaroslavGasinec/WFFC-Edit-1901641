@@ -3,8 +3,12 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include "json.hpp"
+#include <fstream>
+#include "ActionList.h"
 
-//
+using json = nlohmann::json;
+
 //ToolMain Class
 ToolMain::ToolMain()
 {
@@ -16,7 +20,9 @@ ToolMain::ToolMain()
 	m_editorMode = EditorMode::Default;
 
 	//zero input commands
-	m_toolInputCommands.ResetState();	
+	m_toolInputCommands.ResetState();
+
+	LoadMappingsFromConfig();
 }
 
 
@@ -269,12 +275,17 @@ void ToolMain::onActionSave()
 		rc = sqlite3_prepare_v2(m_databaseConnection, sqlCommand2.c_str(), -1, &pResults, 0);
 		sqlite3_step(pResults);	
 	}
+
 	MessageBox(NULL, L"Objects Saved", L"Notification", MB_OK);
 }
 
 void ToolMain::onActionSaveTerrain()
 {
 	m_d3dRenderer.SaveDisplayChunk(&m_chunk);
+}
+
+void ToolMain::LoadMappingsFromConfig()
+{
 }
 
 void ToolMain::Tick(MSG *msg)
