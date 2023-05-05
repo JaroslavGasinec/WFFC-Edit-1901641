@@ -5,10 +5,10 @@
 enum class Actions : int
 {
 
-#define LISTING(Action) Action,
+	#define LISTING(Action) Action,
 	//Use macro to define all the actions
 	ACTIONS(LISTING)
-#undef LISTING
+	#undef LISTING
 
 	// Flags
 	MaxNum,
